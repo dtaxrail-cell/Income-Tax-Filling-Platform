@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useLocation, HashRouter, Routes, Route } from "react-router";
 import { Page } from "./types";
 import { GlobalAnimations } from "./components/GlobalAnimations";
@@ -6,6 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { FloatingWhatsApp } from "./components/FloatingWhatsApp";
+import { PlatformModal } from "./components/PlatformModal";
 import { HomePage } from "./pages/HomePage";
 import { AboutPage } from "./pages/AboutPage";
 import { ServicesPage } from "./pages/ServicesPage";
@@ -15,6 +17,7 @@ import { ContactPage } from "./pages/ContactPage";
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeService, setActiveService] = useState<string | null>(null);
 
   const getPageFromPath = (path: string): Page => {
     if (path.startsWith("/about")) return "about";
@@ -51,9 +54,10 @@ function AppContent() {
           <Route path="*" element={<HomePage setPage={setPageAndScroll} />} />
         </Routes>
       </main>
-      <Footer setPage={setPageAndScroll} />
+      <Footer setPage={setPageAndScroll} onSelectService={setActiveService} />
       <ScrollToTop />
       <FloatingWhatsApp />
+      <PlatformModal activeService={activeService} onClose={() => setActiveService(null)} setPage={setPageAndScroll} />
     </div>
   );
 }

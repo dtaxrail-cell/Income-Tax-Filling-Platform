@@ -977,7 +977,7 @@ export function HomePage({ setPage }: HomePageProps) {
 
               {/* Right Column: CSS Phone Mockup */}
               <div className="md:col-span-5 flex justify-center">
-                <div className="w-[240px] h-[480px] bg-slate-950 rounded-[2.5rem] p-3 shadow-2xl border-4 border-slate-800 relative overflow-hidden select-none animate-bounce" style={{ animationDuration: "3s" }}>
+                <div className="w-[240px] h-[480px] bg-slate-950 rounded-[2.5rem] p-3 shadow-2xl border-4 border-slate-800 relative overflow-hidden select-none" style={{ animation: "gentleBounce 4s ease-in-out infinite" }}>
                   {/* Notch */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4 bg-slate-800 rounded-b-2xl z-30 flex items-center justify-center">
                     <span className="w-1.5 h-1.5 bg-black rounded-full mr-2" />

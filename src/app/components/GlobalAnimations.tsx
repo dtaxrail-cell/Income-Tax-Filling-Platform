@@ -31,6 +31,10 @@ export function GlobalAnimations() {
         0%, 100% { transform: scale(1) rotate(0deg); }
         50%      { transform: scale(1.12) rotate(10deg); }
       }
+      @keyframes gentleBounce {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-10px); }
+      }
     `}</style>
   );
 }

@@ -3,9 +3,10 @@ import { Page, display, mono } from "../types";
 
 interface FooterProps {
   setPage: (p: Page) => void;
+  onSelectService: (serviceName: string) => void;
 }
 
-export function Footer({ setPage }: FooterProps) {
+export function Footer({ setPage, onSelectService }: FooterProps) {
   return (
     <footer className="bg-[#080F1E] text-blue-200/60">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -30,11 +31,21 @@ export function Footer({ setPage }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm">Platform</h4>
+            <button
+              onClick={() => onSelectService("Platform")}
+              className="font-semibold text-white mb-4 text-sm hover:text-blue-300 text-left transition-colors cursor-pointer block"
+            >
+              Platform
+            </button>
             <ul className="space-y-2.5 text-sm">
               {["ITR Filing", "Refund Tracking", "Document Management", "Tax Calculator", "Compliance Alerts"].map((l) => (
                 <li key={l}>
-                  <a href="#" className="hover:text-white transition-colors">{l}</a>
+                  <button
+                    onClick={() => onSelectService(l)}
+                    className="hover:text-white text-left transition-colors cursor-pointer"
+                  >
+                    {l}
+                  </button>
                 </li>
               ))}
             </ul>
