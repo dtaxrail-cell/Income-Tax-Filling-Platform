@@ -314,7 +314,7 @@ export function FutureExpansionPage({ setPage }: FutureExpansionPageProps) {
                 ))}
               </div>
               <a
-                href="https://www.instagram.com/dtaxrail?igsh=Z2p4aGVhcHYxYnd5"
+                href="https://www.instagram.com/dtr_dtaxrail?igsh=MWlueG9pd3JoNzR2Yw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#1A56DB] text-white font-semibold py-3.5 rounded-xl hover:bg-blue-500 transition-colors text-sm flex items-center justify-center gap-2"
@@ -336,7 +336,7 @@ export function FutureExpansionPage({ setPage }: FutureExpansionPageProps) {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="https://www.instagram.com/dtaxrail?igsh=Z2p4aGVhcHYxYnd5"
+              href="https://www.instagram.com/dtr_dtaxrail?igsh=MWlueG9pd3JoNzR2Yw=="
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white text-primary font-semibold px-8 py-4 rounded-xl hover:bg-blue-50 transition-colors flex items-center gap-2"

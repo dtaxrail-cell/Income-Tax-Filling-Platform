@@ -44,7 +44,7 @@ export function ContactPage() {
           <div className="flex flex-wrap justify-center gap-4 text-sm text-blue-300/80" style={mono}>
             <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />8187882772</span>
             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />Bobbili, Vizianagaram, AP</span>
-            <span className="flex items-center gap-1.5"><Instagram className="w-3.5 h-3.5" />@dtaxrail</span>
+            <span className="flex items-center gap-1.5"><Instagram className="w-3.5 h-3.5" />@dtr_dtaxrail</span>
           </div>
         </div>
       </section>
@@ -95,12 +95,12 @@ export function ContactPage() {
                       <div>
                         <h3 className="font-semibold text-foreground mb-1 text-sm">Instagram</h3>
                         <a
-                          href="https://www.instagram.com/dtaxrail?igsh=Z2p4aGVhcHYxYnd5"
+                          href="https://www.instagram.com/dtr_dtaxrail?igsh=MWlueG9pd3JoNzR2Yw=="
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-pink-700 font-semibold hover:underline"
                         >
-                          @dtaxrail
+                          @dtr_dtaxrail
                         </a>
                       </div>
                     </div>
@@ -112,10 +112,10 @@ export function ContactPage() {
                       <div>
                         <h3 className="font-semibold text-foreground mb-1 text-sm">Email</h3>
                         <a
-                          href="mailto:support@dtaxrail.in"
+                          href="mailto:dtaxrail@gmail.com"
                           className="text-sm text-primary hover:underline"
                         >
-                          support@dtaxrail.in
+                          dtaxrail@gmail.com
                         </a>
                       </div>
                     </div>
@@ -154,9 +154,9 @@ export function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Office Hours</h3>
-                      <p className="text-sm text-muted-foreground">Monday – Saturday, 9:00 AM – 8:00 PM IST</p>
+                      <p className="text-sm text-muted-foreground">24/7 Available (All the time)</p>
                       <p className="text-xs text-amber-700 mt-1">
-                        WhatsApp support is monitored 24/7 for urgent queries
+                        Support is monitored 24/7 for all queries
                       </p>
                     </div>
                   </div>
@@ -170,11 +170,11 @@ export function ContactPage() {
                 <h3 className="font-bold text-foreground mb-5" style={display}>Support Information</h3>
                 <div className="space-y-4">
                   {[
-                    { icon: Mail, label: "Email", value: "support@dtaxrail.in", link: "mailto:support@dtaxrail.in" },
+                    { icon: Mail, label: "Email", value: "dtaxrail@gmail.com", link: "mailto:dtaxrail@gmail.com" },
                     { icon: Phone, label: "Phone", value: "8187882772", link: "tel:8187882772" },
                     { icon: MapPin, label: "Address", value: "49-107, Manda St, Bobbili, AP", link: null },
-                    { icon: Clock, label: "Office Hours", value: "Mon–Sat, 9AM–8PM IST", link: null },
-                    { icon: Instagram, label: "Instagram", value: "@dtaxrail", link: "https://www.instagram.com/dtaxrail?igsh=Z2p4aGVhcHYxYnd5" },
+                    { icon: Clock, label: "Office Hours", value: "24/7 Available", link: null },
+                    { icon: Instagram, label: "Instagram", value: "@dtr_dtaxrail", link: "https://www.instagram.com/dtr_dtaxrail?igsh=MWlueG9pd3JoNzR2Yw==" },
                   ].map(({ icon: Icon, label, value, link }) => (
                     <div key={label} className="flex items-start gap-3">
                       <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -207,12 +207,12 @@ export function ContactPage() {
                   Follow us for tax tips, filing updates, and quick support via DM.
                 </p>
                 <a
-                  href="https://www.instagram.com/dtaxrail?igsh=Z2p4aGVhcHYxYnd5"
+                  href="https://www.instagram.com/dtr_dtaxrail?igsh=MWlueG9pd3JoNzR2Yw=="
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#1A56DB] text-white font-semibold py-3 rounded-xl hover:bg-blue-500 transition-colors text-sm inline-block"
                 >
-                  Follow @dtaxrail →
+                  Follow @dtr_dtaxrail →
                 </a>
               </div>
 

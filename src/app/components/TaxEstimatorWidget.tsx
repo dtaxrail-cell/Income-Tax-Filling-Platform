@@ -1,280 +1,401 @@
-import { useState } from "react";
-import { Calculator, Sparkles, TrendingUp, Bell, CheckCircle, ArrowRight, ChevronDown } from "lucide-react";
-import { calculateNewRegimeTax, calculateOldRegimeTax } from "../utils/taxSlabs";
-import { Page, display, mono } from "../types";
+import { useState, useMemo } from "react";
+import { Calculator, ArrowRight, Zap } from "lucide-react";
+import { Page } from "../types";
 
-export interface TaxEstimatorWidgetProps {
+type FY = "2025-26" | "2026-27";
+type PersonaType = "salaried" | "freelancer" | "merchant";
+type AgeCategory = "general" | "senior" | "super_senior";
+
+interface Props {
   persona: "salaried" | "retailer" | "freelancer";
   setPersona: (p: "salaried" | "retailer" | "freelancer") => void;
   setPage: (p: Page) => void;
 }
 
-export function TaxEstimatorWidget({ persona, setPersona, setPage }: TaxEstimatorWidgetProps) {
-  const [income, setIncome] = useState(1200000);
-  const [deductions, setDeductions] = useState(150000);
-  const [tdsPaid, setTdsPaid] = useState(80000);
-  const [selectedRegime, setSelectedRegime] = useState<"new" | "old">("new");
-  const [showExplain, setShowExplain] = useState(false);
+function calcNewRegimeTax(taxableIncome: number): number {
+  if (taxableIncome <= 0) return 0;
+  let tax = 0;
+  const slabs = [
+    { limit: 400000, rate: 0 },
+    { limit: 800000, rate: 0.05 },
+    { limit: 1200000, rate: 0.10 },
+    { limit: 1600000, rate: 0.15 },
+    { limit: 2000000, rate: 0.20 },
+    { limit: 2400000, rate: 0.25 },
+    { limit: Infinity, rate: 0.30 },
+  ];
+  let prev = 0;
+  for (const { limit, rate } of slabs) {
+    if (taxableIncome <= prev) break;
+    tax += (Math.min(taxableIncome, limit) - prev) * rate;
+    prev = limit;
+  }
+  if (taxableIncome <= 1200000) tax = 0;
+  let surcharge = 0;
+  if (taxableIncome > 5000000 && taxableIncome <= 10000000) surcharge = tax * 0.10;
+  else if (taxableIncome > 10000000 && taxableIncome <= 20000000) surcharge = tax * 0.15;
+  else if (taxableIncome > 20000000) surcharge = tax * 0.25;
+  return Math.round((tax + surcharge) * 1.04);
+}
 
-  const isSalaried = persona === "salaried";
-  const oldTax = calculateOldRegimeTax(income, deductions, isSalaried);
-  const newTax = calculateNewRegimeTax(income, isSalaried);
+function calcOldRegimeTax(taxableIncome: number, age: AgeCategory): number {
+  if (taxableIncome <= 0) return 0;
+  let tax = 0;
+  const slabSets: Record<AgeCategory, { limit: number; rate: number }[]> = {
+    general: [
+      { limit: 250000, rate: 0 },
+      { limit: 500000, rate: 0.05 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 },
+    ],
+    senior: [
+      { limit: 300000, rate: 0 },
+      { limit: 500000, rate: 0.05 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 },
+    ],
+    super_senior: [
+      { limit: 500000, rate: 0 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 },
+    ],
+  };
+  let prev = 0;
+  for (const { limit, rate } of slabSets[age]) {
+    if (taxableIncome <= prev) break;
+    tax += (Math.min(taxableIncome, limit) - prev) * rate;
+    prev = limit;
+  }
+  if (taxableIncome <= 500000) tax = Math.max(0, tax - 12500);
+  let surcharge = 0;
+  if (taxableIncome > 5000000 && taxableIncome <= 10000000) surcharge = tax * 0.10;
+  else if (taxableIncome > 10000000 && taxableIncome <= 20000000) surcharge = tax * 0.15;
+  else if (taxableIncome > 20000000) surcharge = tax * 0.25;
+  return Math.round((tax + surcharge) * 1.04);
+}
 
-  const bestRegime = newTax <= oldTax ? "new" : "old";
-  const taxSavings = Math.abs(oldTax - newTax);
+function SliderInput({
+  label, value, onChange, min, max, step = 10000,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+}) {
+  const [rawInput, setRawInput] = useState<string | null>(null);
+  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
 
-  const activeTax = selectedRegime === "new" ? newTax : oldTax;
-  const netDueOrRefund = tdsPaid - activeTax;
+  const fmtLabel = (v: number) =>
+    v >= 100000
+      ? `₹${(v / 100000).toLocaleString("en-IN", { maximumFractionDigits: 1 })}L`
+      : `₹${v.toLocaleString("en-IN")}`;
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0
-    }).format(val);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    setRawInput(raw);
+    const num = parseInt(raw, 10);
+    if (!isNaN(num)) onChange(Math.min(max, Math.max(min, num)));
   };
 
-  return (
-    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-blue-100/50 shadow-2xl rounded-3xl p-6 lg:p-7 max-w-[480px] w-full mx-auto relative select-none z-20">
-      <div className="flex items-center justify-between mb-5 pb-3.5 border-b border-gray-100">
-        <div>
-          <h3 className="font-bold text-foreground text-base sm:text-lg flex items-center gap-2" style={display}>
-            <Calculator className="w-5 h-5 text-primary" /> Tax &amp; Refund Estimator
-          </h3>
-          <p className="text-[10px] text-muted-foreground" style={mono}>FY 2025-26 · AY 2026-27</p>
-        </div>
-        <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse" style={mono}>
-          Live Calc
-        </span>
-      </div>
+  const handleInputBlur = () => {
+    setRawInput(null);
+    const snapped = Math.round(value / step) * step;
+    onChange(Math.min(max, Math.max(min, snapped)));
+  };
 
-      {/* Persona Toggle */}
-      <div className="mb-4">
-        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1.5" style={mono}>Filing Persona</label>
-        <div className="grid grid-cols-3 gap-1.5 bg-muted p-1 rounded-xl">
-          {(["salaried", "retailer", "freelancer"] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              id={`est-persona-${p}`}
-              onClick={() => setPersona(p)}
-              className={`py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize cursor-pointer ${
-                persona === p
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {p === "salaried" ? "💼 Salaried" : p === "retailer" ? "🏪 Merchant" : "🚀 Freelancer"}
+  const displayValue = rawInput !== null ? rawInput : value.toLocaleString("en-IN");
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center bg-white border border-border rounded-lg px-2 py-1.5 shadow-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all flex-shrink-0 w-[118px]">
+          <span className="text-xs font-bold text-muted-foreground mr-1 select-none">₹</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={displayValue}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            onFocus={() => setRawInput(String(value))}
+            className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums"
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => { setRawInput(null); onChange(Number(e.target.value)); }}
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+            style={{ background: `linear-gradient(to right, #1A56DB ${pct}%, #e5e7eb ${pct}%)` }}
+          />
+        </div>
+      </div>
+      <div className="flex justify-between text-[9px] text-muted-foreground pl-[122px]" style={{ fontFamily: "monospace" }}>
+        <span>{fmtLabel(min)}</span>
+        <span>{fmtLabel(max)}</span>
+      </div>
+    </div>
+  );
+}
+
+export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
+  const [fy, setFy] = useState<FY>("2025-26");
+  const [internalPersona, setInternalPersona] = useState<PersonaType>("salaried");
+  const [age, setAge] = useState<AgeCategory>("general");
+  const [grossIncome, setGrossIncome] = useState(1800000);
+  const [exemptions, setExemptions] = useState(20000);
+  const [deductions, setDeductions] = useState(150000);
+  const [nps, setNps] = useState(15000);
+  const [tdsPaid, setTdsPaid] = useState(20000);
+
+  const syncPersona = (p: PersonaType) => {
+    setInternalPersona(p);
+    if (p === "salaried") setPersona("salaried");
+    else if (p === "freelancer") setPersona("freelancer");
+    else setPersona("retailer");
+  };
+
+  const netIncomeNew = useMemo(
+    () => Math.max(0, grossIncome - exemptions - 75000),
+    [grossIncome, exemptions]
+  );
+  const netIncomeOld = useMemo(
+    () => Math.max(0, grossIncome - exemptions - 50000 - deductions - nps),
+    [grossIncome, exemptions, deductions, nps]
+  );
+
+  const taxNew            = useMemo(() => calcNewRegimeTax(netIncomeNew), [netIncomeNew]);
+  const taxOldGeneral     = useMemo(() => calcOldRegimeTax(netIncomeOld, "general"), [netIncomeOld]);
+  const taxOldSenior      = useMemo(() => calcOldRegimeTax(netIncomeOld, "senior"), [netIncomeOld]);
+  const taxOldSuperSenior = useMemo(() => calcOldRegimeTax(netIncomeOld, "super_senior"), [netIncomeOld]);
+
+  const taxOld =
+    age === "senior" ? taxOldSenior :
+    age === "super_senior" ? taxOldSuperSenior :
+    taxOldGeneral;
+
+  const refundNew   = tdsPaid - taxNew;
+  const refundOld   = tdsPaid - taxOld;
+  const newIsBetter = taxNew <= taxOld;
+  const saving      = Math.abs(taxOld - taxNew);
+
+  const fmt = (v: number) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
+  const fmtAbs = (v: number) => fmt(Math.abs(v));
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl border border-border overflow-hidden w-full">
+
+      {/* Header */}
+      <div className="bg-[#0C1B33] px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
+            <Calculator className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="text-white text-sm font-bold leading-none">Income Tax Calculator</div>
+            <div className="text-blue-300 text-[9px] mt-0.5" style={{ fontFamily: "monospace" }}>Tax Estimator · Real-Time</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 bg-white/10 border border-white/15 rounded-xl p-1">
+          {(["2025-26", "2026-27"] as FY[]).map((f) => (
+            <button key={f} type="button" onClick={() => setFy(f)}
+              className={`text-[9px] font-bold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${fy === f ? "bg-blue-500 text-white" : "text-blue-300 hover:text-white"}`}
+              style={{ fontFamily: "monospace" }}>
+              FY {f}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Income Slider */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-1">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5" style={mono}>
-            Gross Annual Income
-          </label>
-          <span className="text-xs font-bold text-primary" style={mono}>{formatCurrency(income)}</span>
-        </div>
-        <input
-          type="range"
-          id="est-income-slider"
-          min={300000}
-          max={5000000}
-          step={50000}
-          value={income}
-          onChange={(e) => setIncome(Number(e.target.value))}
-          className="w-full h-1.5 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-primary"
-        />
-        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5" style={mono}>
-          <span>₹3L</span>
-          <span>₹25L</span>
-          <span>₹50L</span>
-        </div>
-      </div>
+      <div className="p-5 space-y-5">
 
-      {/* Deductions Slider */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-1">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5" style={mono}>
-            Deductions <span className="text-[9px] text-blue-500 font-normal lowercase">(80C, 80D, standard etc.)</span>
-          </label>
-          <span className="text-xs font-bold text-foreground" style={mono}>{formatCurrency(deductions)}</span>
-        </div>
-        <input
-          type="range"
-          id="est-deductions-slider"
-          min={0}
-          max={250000}
-          step={10000}
-          value={deductions}
-          onChange={(e) => setDeductions(Number(e.target.value))}
-          className="w-full h-1.5 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-primary"
-        />
-        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5" style={mono}>
-          <span>₹0</span>
-          <span>₹1.25L</span>
-          <span>₹2.5L</span>
-        </div>
-      </div>
-
-      {/* TDS Slider */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-1">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1.5" style={mono}>
-            TDS / Tax Already Paid
-          </label>
-          <span className="text-xs font-bold text-foreground" style={mono}>{formatCurrency(tdsPaid)}</span>
-        </div>
-        <input
-          type="range"
-          id="est-tds-slider"
-          min={0}
-          max={1500000}
-          step={5000}
-          value={tdsPaid}
-          onChange={(e) => setTdsPaid(Number(e.target.value))}
-          className="w-full h-1.5 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-primary"
-        />
-        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5" style={mono}>
-          <span>₹0</span>
-          <span>₹7.5L</span>
-          <span>₹15L</span>
-        </div>
-      </div>
-
-      {/* Comparison */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <button
-          type="button"
-          id="select-new-regime"
-          onClick={() => setSelectedRegime("new")}
-          className={`p-2.5 rounded-xl text-left transition-all border-2 flex flex-col justify-between cursor-pointer ${
-            selectedRegime === "new"
-              ? "border-primary bg-primary/5"
-              : "border-gray-100 bg-white hover:border-gray-200"
-          }`}
-        >
-          <div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase" style={mono}>New Regime</div>
-            <div className="text-sm font-extrabold text-foreground mt-0.5" style={display}>
-              {formatCurrency(newTax)}
-            </div>
-          </div>
-          <div className="mt-2 flex items-center justify-between w-full">
-            <span className="text-[9px] text-muted-foreground">Tax Due</span>
-            {bestRegime === "new" && (
-              <span className="bg-green-100 text-green-700 text-[8px] font-bold px-1 py-0.2 rounded" style={mono}>
-                Best
-              </span>
-            )}
-          </div>
-        </button>
-
-        <button
-          type="button"
-          id="select-old-regime"
-          onClick={() => setSelectedRegime("old")}
-          className={`p-2.5 rounded-xl text-left transition-all border-2 flex flex-col justify-between cursor-pointer ${
-            selectedRegime === "old"
-              ? "border-primary bg-primary/5"
-              : "border-gray-100 bg-white hover:border-gray-200"
-          }`}
-        >
-          <div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase" style={mono}>Old Regime</div>
-            <div className="text-sm font-extrabold text-foreground mt-0.5" style={display}>
-              {formatCurrency(oldTax)}
-            </div>
-          </div>
-          <div className="mt-2 flex items-center justify-between w-full">
-            <span className="text-[9px] text-muted-foreground">Tax Due</span>
-            {bestRegime === "old" && (
-              <span className="bg-green-100 text-green-700 text-[8px] font-bold px-1 py-0.2 rounded" style={mono}>
-                Best
-              </span>
-            )}
-          </div>
-        </button>
-      </div>
-
-      {/* Savings Notification */}
-      {taxSavings > 0 && (
-        <div className="mb-3 bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 flex items-center gap-2 text-[11px] text-emerald-800">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 animate-pulse" />
-          <div className="leading-tight">
-            You save <strong className="text-emerald-700">{formatCurrency(taxSavings)}</strong> under the{" "}
-            <strong className="uppercase">{bestRegime === "new" ? "New" : "Old"}</strong> Regime!
-          </div>
-        </div>
-      )}
-
-      {/* Due / Refund */}
-      <div className={`p-3 rounded-xl border mb-4 flex items-center gap-3 justify-between transition-all ${
-        netDueOrRefund > 0
-          ? "bg-green-50 border-green-100"
-          : netDueOrRefund < 0
-          ? "bg-amber-50 border-amber-100"
-          : "bg-gray-50 border-gray-100"
-      }`}>
+        {/* Filing Profile */}
         <div>
-          <div className="text-[9px] text-muted-foreground uppercase" style={mono}>
-            {netDueOrRefund > 0 ? "Estimated Refund" : netDueOrRefund < 0 ? "Balance Tax Payable" : "Balance Status"}
-          </div>
-          <div className={`text-base font-black mt-0.5 ${
-            netDueOrRefund > 0 ? "text-green-600" : netDueOrRefund < 0 ? "text-amber-600" : "text-gray-600"
-          }`} style={display}>
-            {formatCurrency(Math.abs(netDueOrRefund))}
+          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Filing Profile</div>
+          <div className="grid grid-cols-3 gap-1.5 bg-muted p-1.5 rounded-xl">
+            {([
+              { val: "salaried", label: "💼 Salaried" },
+              { val: "freelancer", label: "🚀 Freelancer" },
+              { val: "merchant", label: "🏪 Business" },
+            ] as { val: PersonaType; label: string }[]).map(({ val, label }) => (
+              <button key={val} type="button" onClick={() => syncPersona(val)}
+                className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer text-center ${
+                  internalPersona === val
+                    ? "bg-white text-primary shadow-sm border border-gray-100"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}>
+                {label}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="flex-shrink-0">
-          {netDueOrRefund > 0 ? (
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-              <TrendingUp className="w-4 h-4" />
+
+        {/* Age Category */}
+        <div>
+          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Age Category</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {([
+              { val: "general", label: "General", sub: "< 60 yrs" },
+              { val: "senior", label: "Senior", sub: "60–79 yrs" },
+              { val: "super_senior", label: "Super Sr.", sub: "80+ yrs" },
+            ] as { val: AgeCategory; label: string; sub: string }[]).map(({ val, label, sub }) => (
+              <button key={val} type="button" onClick={() => setAge(val)}
+                className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                  age === val
+                    ? "border-primary bg-blue-50 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                }`}>
+                <div className="text-[10px] font-bold">{label}</div>
+                <div className="text-[8px] mt-0.5" style={{ fontFamily: "monospace" }}>{sub}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sliders with Input Fields */}
+        <div className="space-y-4">
+          <SliderInput label="Gross Annual Income" value={grossIncome} onChange={setGrossIncome} min={0} max={5000000} step={10000} />
+          <SliderInput label="Exempted Allowances (HRA, LTA, etc.)" value={exemptions} onChange={setExemptions} min={0} max={3000000} step={5000} />
+          <SliderInput label="Deductions (80C, 80D, etc.) — excl. Std. & NPS" value={deductions} onChange={setDeductions} min={0} max={3000000} step={5000} />
+          <SliderInput label="NPS Contribution (Sec 80CCD(1B))" value={nps} onChange={setNps} min={0} max={1000000} step={5000} />
+          <SliderInput label="TDS / Tax Already Paid" value={tdsPaid} onChange={setTdsPaid} min={0} max={2500000} step={5000} />
+        </div>
+
+        {/* Net Income Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+            <div className="text-[9px] text-blue-500 font-bold uppercase mb-1" style={{ fontFamily: "monospace" }}>Net Income · New</div>
+            <div className="text-base font-bold text-blue-700">{fmt(netIncomeNew)}</div>
+            <div className="text-[8px] text-muted-foreground mt-0.5">Std. deduction ₹75,000 applied</div>
+          </div>
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+            <div className="text-[9px] text-indigo-500 font-bold uppercase mb-1" style={{ fontFamily: "monospace" }}>Net Income · Old</div>
+            <div className="text-base font-bold text-indigo-700">{fmt(netIncomeOld)}</div>
+            <div className="text-[8px] text-muted-foreground mt-0.5">All deductions applied</div>
+          </div>
+        </div>
+
+        {/* Tax Comparison */}
+        <div className="bg-muted/60 rounded-2xl border border-border overflow-hidden">
+          <div className="grid grid-cols-2 divide-x divide-border">
+            <div className="p-4">
+              <div className="flex items-center gap-1 mb-2 flex-wrap">
+                <div className={`w-1.5 h-1.5 rounded-full ${newIsBetter ? "bg-green-500" : "bg-gray-300"}`} />
+                <span className="text-[9px] font-bold text-muted-foreground uppercase" style={{ fontFamily: "monospace" }}>New Regime</span>
+                {newIsBetter && <span className="ml-auto bg-green-100 text-green-700 text-[8px] font-bold px-1.5 py-0.5 rounded-full">Better ✓</span>}
+              </div>
+              <div className="text-[9px] text-muted-foreground mb-1">Tax Liability</div>
+              <div className={`text-xl font-bold ${newIsBetter ? "text-green-600" : "text-foreground"}`}>{fmt(taxNew)}</div>
             </div>
-          ) : netDueOrRefund < 0 ? (
-            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 animate-bounce">
-              <Bell className="w-4 h-4" />
+            <div className="p-4">
+              <div className="flex items-center gap-1 mb-2 flex-wrap">
+                <div className={`w-1.5 h-1.5 rounded-full ${!newIsBetter ? "bg-green-500" : "bg-gray-300"}`} />
+                <span className="text-[9px] font-bold text-muted-foreground uppercase" style={{ fontFamily: "monospace" }}>Old Regime</span>
+                {!newIsBetter && <span className="ml-auto bg-green-100 text-green-700 text-[8px] font-bold px-1.5 py-0.5 rounded-full">Better ✓</span>}
+              </div>
+              <div className="text-[9px] text-muted-foreground mb-1">
+                Tax Liability
+                {age === "senior" && <span className="ml-1 text-[8px] text-primary">(Senior)</span>}
+                {age === "super_senior" && <span className="ml-1 text-[8px] text-primary">(Super Sr.)</span>}
+              </div>
+              <div className={`text-xl font-bold ${!newIsBetter ? "text-green-600" : "text-foreground"}`}>{fmt(taxOld)}</div>
+              <div className="mt-2 space-y-0.5 border-t border-border pt-2">
+                {age !== "general" && (
+                  <div className="flex justify-between text-[8px] text-muted-foreground/50">
+                    <span>General (&lt;60)</span><span>{fmt(taxOldGeneral)}</span>
+                  </div>
+                )}
+                {age !== "senior" && (
+                  <div className="flex justify-between text-[8px] text-muted-foreground/50">
+                    <span>Senior (60-79)</span><span>{fmt(taxOldSenior)}</span>
+                  </div>
+                )}
+                {age !== "super_senior" && (
+                  <div className="flex justify-between text-[8px] text-muted-foreground/50">
+                    <span>Super Sr. (80+)</span><span>{fmt(taxOldSuperSenior)}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : (
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-              <CheckCircle className="w-4 h-4" />
+          </div>
+          <div className={`px-4 py-2.5 border-t border-border flex items-center justify-between ${newIsBetter ? "bg-green-50" : "bg-amber-50"}`}>
+            <span className="text-[10px] font-bold text-foreground">
+              {newIsBetter ? "✓ New Regime saves you" : "✓ Old Regime saves you"}
+            </span>
+            <span className={`text-sm font-extrabold ${newIsBetter ? "text-green-600" : "text-amber-600"}`}>{fmt(saving)}</span>
+          </div>
+        </div>
+
+        {/* Refund / Payment */}
+        <div>
+          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Estimated Refund / (Payment Due)</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className={`rounded-xl p-3 border ${refundNew >= 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100"}`}>
+              <div className="text-[9px] font-bold uppercase mb-1" style={{ fontFamily: "monospace", color: refundNew >= 0 ? "#16a34a" : "#dc2626" }}>New Regime</div>
+              <div className={`text-base font-bold ${refundNew >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {refundNew >= 0 ? `+${fmtAbs(refundNew)}` : `-${fmtAbs(refundNew)}`}
+              </div>
+              <div className="text-[8px] text-muted-foreground mt-0.5">{refundNew >= 0 ? "Refund Expected" : "Tax Due"}</div>
+            </div>
+            <div className={`rounded-xl p-3 border ${refundOld >= 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100"}`}>
+              <div className="text-[9px] font-bold uppercase mb-1" style={{ fontFamily: "monospace", color: refundOld >= 0 ? "#16a34a" : "#dc2626" }}>Old Regime</div>
+              <div className={`text-base font-bold ${refundOld >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {refundOld >= 0 ? `+${fmtAbs(refundOld)}` : `-${fmtAbs(refundOld)}`}
+              </div>
+              <div className="text-[8px] text-muted-foreground mt-0.5">{refundOld >= 0 ? "Refund Expected" : "Tax Due"}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Persona CTA */}
+        <div className="pt-1">
+          {internalPersona === "salaried" && (
+            <button type="button" onClick={() => setPage("contact")}
+              className="w-full bg-[#1A56DB] hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-md shadow-blue-200 cursor-pointer">
+              Finalise Tax &amp; File ITR Now <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+          {internalPersona === "freelancer" && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <div className="text-amber-700 font-bold text-xs mb-1.5 flex items-center justify-center gap-1.5">
+                <Zap className="w-3.5 h-3.5" />
+                Since you're a freelancer, please reach out to our professionals for accurate tax filing
+              </div>
+              <button type="button" onClick={() => setPage("contact")}
+                className="mt-2 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 mx-auto cursor-pointer">
+                Talk to a CA Expert <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {internalPersona === "merchant" && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center">
+              <div className="text-indigo-700 font-bold text-xs mb-1.5 flex items-center justify-center gap-1.5">
+                <Zap className="w-3.5 h-3.5" />
+                Since you fall under sole proprietor / business profile, please reach out to us for accurate tax filing
+              </div>
+              <button type="button" onClick={() => setPage("contact")}
+                className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 mx-auto cursor-pointer">
+                Get Expert Help <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
         </div>
-      </div>
 
-      <button
-        type="button"
-        id="est-file-btn"
-        onClick={() => setPage("contact")}
-        className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer active:scale-98"
-      >
-        {netDueOrRefund > 0 ? "Claim Your Refund Now" : "File Your Return Now"}
-        <ArrowRight className="w-3.5 h-3.5" />
-      </button>
+        {/* Disclaimer */}
+        <p className="text-[8px] text-muted-foreground text-center leading-relaxed">
+          * Estimates based on FY {fy} IT Act slabs. Std. deduction ₹75,000 (New) / ₹50,000 (Old) auto-applied.
+          Includes 4% cess + surcharge where applicable. Consult a CA for final filing.
+        </p>
 
-      {/* Explain calculations */}
-      <div className="mt-3.5 border-t border-dashed border-gray-100 pt-3">
-        <button
-          type="button"
-          onClick={() => setShowExplain(!showExplain)}
-          className="w-full flex items-center justify-between text-[11px] font-bold text-primary hover:text-blue-600 transition-colors"
-        >
-          <span>🔍 How is my tax &amp; refund estimated?</span>
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showExplain ? "rotate-180" : ""}`} />
-        </button>
-        {showExplain && (
-          <div className="mt-2 text-[10px] text-muted-foreground leading-relaxed bg-muted/40 p-3 rounded-xl border border-border/40 space-y-1.5">
-            <p><strong>1. Taxable Income:</strong> Standard deduction of {isSalaried ? "₹75,000" : "₹0"} is deducted from your gross income under the New regime (or {isSalaried ? "₹50,000" : "₹0"} plus your entered deductions under the Old regime).</p>
-            <p><strong>2. New Tax Slabs:</strong> Nil up to ₹4L, 5% on ₹4L-8L, 10% on ₹8L-12L, 15% on ₹12L-16L, 20% on ₹16L-20L, 25% on ₹20L-24L, and 30% above ₹24L. Tax is calculated incrementally.</p>
-            <p><strong>3. Section 87A Rebate:</strong> If your net taxable income is ₹12,00,000 or below under the New regime, the tax liability is fully rebated to ₹0.</p>
-            <p><strong>4. Health &amp; Education Cess:</strong> A surcharge of 4% is added to the calculated tax liability.</p>
-            <p><strong>5. Refund/Payable Calculation:</strong> <code>Refund = TDS Paid - Calculated Tax Liability</code>. If positive, you get a refund. If negative, it is a tax due.</p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, TrendingUp, Database, Bell, HelpCircle, Lock, Smartphone, Headphones, CheckCircle, Calculator, ArrowRight, ChevronDown } from "lucide-react";
+import { FileText, TrendingUp, Database, Bell, HelpCircle, Lock, Smartphone, Headphones, CheckCircle, ArrowRight, ChevronDown } from "lucide-react";
 import { Page, display, mono } from "../types";
 import { SectionParticles } from "../components/SectionParticles";
 
@@ -255,47 +255,6 @@ export function ServicesPage({ setPage }: ServicesPageProps) {
                 </div>
                 <h3 className="font-bold text-foreground mb-2 text-base" style={display}>{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Tax Tools */}
-      <section className="py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
-              FREE TAX TOOLS
-            </div>
-            <h2 className="text-3xl font-bold text-foreground mb-3" style={display}>Calculate before you file</h2>
-            <p className="text-muted-foreground">Free tools to help you plan and optimise your taxes</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                icon: Calculator,
-                title: "Income Tax Calculator",
-                desc: "Calculate your exact tax liability for FY 2025-26 under old and new regime in seconds.",
-                badge: "Coming Soon",
-              },
-              {
-                icon: TrendingUp,
-                title: "Regime Comparison",
-                desc: "Side-by-side comparison of old vs. new tax regime with deductions to pick the best option.",
-                badge: "Coming Soon",
-              },
-            ].map(({ icon: Icon, title, desc, badge }) => (
-              <div key={title} className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-bold text-foreground mb-2" style={display}>{title}</h3>
-                <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{desc}</p>
-                <span className="inline-block bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full" style={mono}>
-                  {badge}
-                </span>
               </div>
             ))}
           </div>
