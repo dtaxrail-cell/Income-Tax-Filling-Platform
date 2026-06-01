@@ -1,4 +1,4 @@
-import { IndianRupee, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Page, display, mono } from "../types";
 
 interface FooterProps {
@@ -13,8 +13,12 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 bg-[#1A56DB] rounded-xl flex items-center justify-center">
-                <IndianRupee className="w-5 h-5 text-white" />
+              <div className="h-10 flex items-center bg-white border border-gray-100 rounded-xl px-2.5 py-1 shadow-sm overflow-hidden flex-shrink-0">
+                <img
+                  src="/logo.jpg"
+                  className="h-8 w-auto object-contain"
+                  alt="DTR Logo"
+                />
               </div>
               <span className="font-extrabold text-white text-lg" style={display}>D Tax Rail</span>
             </div>
@@ -31,23 +35,69 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
           </div>
 
           <div>
+            {/* Hiding Platform header by commenting it out for now
             <button
               onClick={() => onSelectService("Platform")}
               className="font-semibold text-white mb-4 text-sm hover:text-blue-300 text-left transition-colors cursor-pointer block"
             >
               Platform
             </button>
+            */}
             <ul className="space-y-2.5 text-sm">
-              {["ITR Filing", "Refund Tracking", "Document Management", "Tax Calculator", "Compliance Alerts"].map((l) => (
-                <li key={l}>
-                  <button
-                    onClick={() => onSelectService(l)}
-                    className="hover:text-white text-left transition-colors cursor-pointer"
-                  >
-                    {l}
-                  </button>
-                </li>
-              ))}
+              <li>
+                <button
+                  onClick={() => onSelectService("ITR Filing")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  ITR Filing
+                </button>
+              </li>
+              {/* Hiding Refund Tracking by commenting it out for now
+              <li>
+                <button
+                  onClick={() => onSelectService("Refund Tracking")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  Refund Tracking
+                </button>
+              </li>
+              */}
+              {/* Hiding Document Management by commenting it out for now
+              <li>
+                <button
+                  onClick={() => onSelectService("Document Management")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  Document Management
+                </button>
+              </li>
+              */}
+              <li>
+                <button
+                  onClick={() => {
+                    setPage("home");
+                    setTimeout(() => {
+                      const el = document.getElementById("hero-estimator-section");
+                      if (el) {
+                        el.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }, 300);
+                  }}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  Tax Calculator
+                </button>
+              </li>
+              {/* Hiding Compliance Alerts by commenting it out for now
+              <li>
+                <button
+                  onClick={() => onSelectService("Compliance Alerts")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  Compliance Alerts
+                </button>
+              </li>
+              */}
             </ul>
           </div>
 

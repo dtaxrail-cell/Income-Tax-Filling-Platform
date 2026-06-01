@@ -101,8 +101,7 @@ function SliderInput({
 
   const handleInputBlur = () => {
     setRawInput(null);
-    const snapped = Math.round(value / step) * step;
-    onChange(Math.min(max, Math.max(min, snapped)));
+    onChange(Math.min(max, Math.max(min, value)));
   };
 
   const displayValue = rawInput !== null ? rawInput : value.toLocaleString("en-IN");
@@ -122,7 +121,7 @@ function SliderInput({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onFocus={() => setRawInput(String(value))}
-            className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums"
+            className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums caret-transparent"
           />
         </div>
         <div className="flex-1">
@@ -266,7 +265,7 @@ export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
           <SliderInput label="Gross Annual Income" value={grossIncome} onChange={setGrossIncome} min={0} max={5000000} step={10000} />
           <SliderInput label="Exempted Allowances (HRA, LTA, etc.)" value={exemptions} onChange={setExemptions} min={0} max={3000000} step={5000} />
           <SliderInput label="Deductions (80C, 80D, etc.) — excl. Std. & NPS" value={deductions} onChange={setDeductions} min={0} max={3000000} step={5000} />
-          <SliderInput label="NPS Contribution (Sec 80CCD(1B))" value={nps} onChange={setNps} min={0} max={1000000} step={5000} />
+          <SliderInput label="NPS Contribution (Sec 80CCD2)" value={nps} onChange={setNps} min={0} max={1000000} step={5000} />
           <SliderInput label="TDS / Tax Already Paid" value={tdsPaid} onChange={setTdsPaid} min={0} max={2500000} step={5000} />
         </div>
 

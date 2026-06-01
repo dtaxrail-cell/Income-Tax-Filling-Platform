@@ -24,24 +24,45 @@ export function HomePage({ setPage }: HomePageProps) {
 
   const testimonials = [
     {
-      name: "Priya Sharma",
-      city: "Mumbai",
-      role: "Software Engineer",
-      quote: "D Tax Rail made filing my ITR incredibly simple. Got my ₹31,200 refund credited in just 8 days!",
+      name: "Surya Ippili",
+      city: "Srikakulam",
+      role: "Business Owner",
+      quote: "As a business owner, sorting out GST and business taxes was a massive headache. D Tax Rail made it effortless. Prompt responses and complete transparency!",
       rating: 5,
     },
     {
-      name: "Rajesh Kumar",
-      city: "Bengaluru",
-      role: "Freelance Designer",
-      quote: "Managing multiple income sources was always complicated. Not anymore. The expert guidance is outstanding.",
+      name: "Ramana Santosh",
+      city: "Rayagada, Odisha",
+      role: "Indian Railways",
+      quote: "Being in the Indian Railways, I wanted a clear picture of my salary deductions and old vs new tax regime comparisons. The tax estimator is extremely clear and accurate.",
       rating: 5,
     },
     {
-      name: "Anita Mehta",
-      city: "New Delhi",
-      role: "Small Business Owner",
-      quote: "The compliance alerts saved me from an advance tax penalty. Their CAs truly understand business taxation.",
+      name: "Sikha Agarwal",
+      city: "Bhubaneswar",
+      role: "Banking",
+      quote: "Working in banking, I appreciate precision. The CAs verified my capital gains and housing loan interest deductions flawlessly. Outstanding customer service.",
+      rating: 5,
+    },
+    {
+      name: "Chappa Prasad",
+      city: "Visakhapatnam",
+      role: "Inspector of Police",
+      quote: "Very reliable and timely service. The team helped me file my tax returns securely, explaining each tax saving benefit. Highly recommended for public servants.",
+      rating: 5,
+    },
+    {
+      name: "Uma",
+      city: "Hyderabad",
+      role: "Teacher",
+      quote: "I was confused about tax exemptions on my salary and HRA. D Tax Rail guided me step-by-step. The interface is clean and they make it very easy to understand.",
+      rating: 5,
+    },
+    {
+      name: "Andrea Mary",
+      city: "Kerala",
+      role: "Freelancer",
+      quote: "Filing taxes as a freelancer with multiple foreign clients used to be stressful. D Tax Rail helped me claim correct expenses and file everything on time!",
       rating: 5,
     },
   ];
@@ -218,7 +239,7 @@ export function HomePage({ setPage }: HomePageProps) {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map(({ name, city, role, quote, rating }) => (
               <div
                 key={name}

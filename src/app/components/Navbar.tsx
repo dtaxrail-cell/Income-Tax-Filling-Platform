@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { IndianRupee, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Page, display } from "../types";
 
 interface NavbarProps {
@@ -37,8 +37,12 @@ export function Navbar({ page, setPage }: NavbarProps) {
             onClick={() => setPage("home")}
             className="flex items-center gap-2.5"
           >
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-              <IndianRupee className="w-5 h-5 text-white" />
+            <div className="h-10 flex items-center bg-white border border-gray-100 rounded-xl px-2.5 py-1 shadow-sm overflow-hidden flex-shrink-0">
+              <img
+                src="/logo.jpg"
+                className="h-8 w-auto object-contain"
+                alt="DTR Logo"
+              />
             </div>
             <span className="font-extrabold text-lg text-foreground" style={display}>
               D Tax Rail
