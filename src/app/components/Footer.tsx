@@ -35,43 +35,8 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
           </div>
 
           <div>
-            {/* Hiding Platform header by commenting it out for now
-            <button
-              onClick={() => onSelectService("Platform")}
-              className="font-semibold text-white mb-4 text-sm hover:text-blue-300 text-left transition-colors cursor-pointer block"
-            >
-              Platform
-            </button>
-            */}
+            <h4 className="font-semibold text-white mb-4 text-sm">Tax Tools</h4>
             <ul className="space-y-2.5 text-sm">
-              <li>
-                <button
-                  onClick={() => onSelectService("ITR Filing")}
-                  className="hover:text-white text-left transition-colors cursor-pointer"
-                >
-                  ITR Filing
-                </button>
-              </li>
-              {/* Hiding Refund Tracking by commenting it out for now
-              <li>
-                <button
-                  onClick={() => onSelectService("Refund Tracking")}
-                  className="hover:text-white text-left transition-colors cursor-pointer"
-                >
-                  Refund Tracking
-                </button>
-              </li>
-              */}
-              {/* Hiding Document Management by commenting it out for now
-              <li>
-                <button
-                  onClick={() => onSelectService("Document Management")}
-                  className="hover:text-white text-left transition-colors cursor-pointer"
-                >
-                  Document Management
-                </button>
-              </li>
-              */}
               <li>
                 <button
                   onClick={() => {
@@ -88,13 +53,47 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
                   Tax Calculator
                 </button>
               </li>
-              {/* Hiding Compliance Alerts by commenting it out for now
+              {/* 
               <li>
                 <button
-                  onClick={() => onSelectService("Compliance Alerts")}
+                  onClick={() => onSelectService("HRA Calculator")}
                   className="hover:text-white text-left transition-colors cursor-pointer"
                 >
-                  Compliance Alerts
+                  HRA Calculator
+                </button>
+              </li>
+              */}
+              <li>
+                <button
+                  onClick={() => setPage("itr-filing")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  ITR Filing
+                </button>
+              </li>
+              {/* 
+              <li>
+                <button
+                  onClick={() => onSelectService("EMI Calculator")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  EMI Calculator
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onSelectService("SIP Calculator")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  SIP Calculator
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onSelectService("Present Value Calculator")}
+                  className="hover:text-white text-left transition-colors cursor-pointer"
+                >
+                  Present Value Calculator
                 </button>
               </li>
               */}

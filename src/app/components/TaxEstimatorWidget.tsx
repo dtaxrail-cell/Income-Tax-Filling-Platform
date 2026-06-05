@@ -96,7 +96,7 @@ function SliderInput({
     const raw = e.target.value.replace(/[^0-9]/g, "");
     setRawInput(raw);
     const num = parseInt(raw, 10);
-    if (!isNaN(num)) onChange(Math.min(max, Math.max(min, num)));
+    if (!isNaN(num)) onChange(num);
   };
 
   const handleInputBlur = () => {
@@ -121,7 +121,7 @@ function SliderInput({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onFocus={() => setRawInput(String(value))}
-            className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums caret-transparent"
+            className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums"
           />
         </div>
         <div className="flex-1">
@@ -162,14 +162,16 @@ export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
     else setPersona("retailer");
   };
 
-  const netIncomeNew = useMemo(
-    () => Math.max(0, grossIncome - exemptions - 75000),
-    [grossIncome, exemptions]
-  );
-  const netIncomeOld = useMemo(
-    () => Math.max(0, grossIncome - exemptions - 50000 - deductions - nps),
-    [grossIncome, exemptions, deductions, nps]
-  );
+  const netIncomeNew = useMemo(() => {
+    const stdDed = internalPersona === "salaried" ? 75000 : 0;
+    const npsDed = internalPersona === "salaried" ? nps : 0;
+    return Math.max(0, grossIncome - npsDed - stdDed);
+  }, [grossIncome, nps, internalPersona]);
+
+  const netIncomeOld = useMemo(() => {
+    const stdDed = internalPersona === "salaried" ? 50000 : 0;
+    return Math.max(0, grossIncome - exemptions - stdDed - deductions - nps);
+  }, [grossIncome, exemptions, deductions, nps, internalPersona]);
 
   const taxNew            = useMemo(() => calcNewRegimeTax(netIncomeNew), [netIncomeNew]);
   const taxOldGeneral     = useMemo(() => calcOldRegimeTax(netIncomeOld, "general"), [netIncomeOld]);
@@ -262,7 +264,7 @@ export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
 
         {/* Sliders with Input Fields */}
         <div className="space-y-4">
-          <SliderInput label="Gross Annual Income" value={grossIncome} onChange={setGrossIncome} min={0} max={5000000} step={10000} />
+          <SliderInput label="Gross Annual Income" value={grossIncome} onChange={setGrossIncome} min={0} max={5000000} step={25000} />
           <SliderInput label="Exempted Allowances (HRA, LTA, etc.)" value={exemptions} onChange={setExemptions} min={0} max={3000000} step={5000} />
           <SliderInput label="Deductions (80C, 80D, etc.) — excl. Std. & NPS" value={deductions} onChange={setDeductions} min={0} max={3000000} step={5000} />
           <SliderInput label="NPS Contribution (Sec 80CCD2)" value={nps} onChange={setNps} min={0} max={1000000} step={5000} />
@@ -274,12 +276,16 @@ export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
             <div className="text-[9px] text-blue-500 font-bold uppercase mb-1" style={{ fontFamily: "monospace" }}>Net Income · New</div>
             <div className="text-base font-bold text-blue-700">{fmt(netIncomeNew)}</div>
-            <div className="text-[8px] text-muted-foreground mt-0.5">Std. deduction ₹75,000 applied</div>
+            <div className="text-[8px] text-muted-foreground mt-0.5">
+              {internalPersona === "salaried" ? "Std. deduction ₹75,000 applied" : "No standard deduction applied"}
+            </div>
           </div>
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
             <div className="text-[9px] text-indigo-500 font-bold uppercase mb-1" style={{ fontFamily: "monospace" }}>Net Income · Old</div>
             <div className="text-base font-bold text-indigo-700">{fmt(netIncomeOld)}</div>
-            <div className="text-[8px] text-muted-foreground mt-0.5">All deductions applied</div>
+            <div className="text-[8px] text-muted-foreground mt-0.5">
+              {internalPersona === "salaried" ? "Std. deduction ₹50,000 & deductions" : "Deductions applied"}
+            </div>
           </div>
         </div>
 

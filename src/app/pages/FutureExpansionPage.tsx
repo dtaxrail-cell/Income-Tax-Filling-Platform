@@ -208,7 +208,6 @@ export function FutureExpansionPage({ setPage }: FutureExpansionPageProps) {
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <h3 className="font-bold text-foreground text-lg" style={display}>{title}</h3>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}`} style={mono}>Coming Soon</span>
                       </div>
                     </div>
                     <div className={`w-8 h-8 rounded-full border border-border flex items-center justify-center flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? "rotate-180 bg-muted" : ""}`}>

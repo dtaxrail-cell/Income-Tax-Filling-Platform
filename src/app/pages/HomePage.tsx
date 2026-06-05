@@ -1,11 +1,17 @@
 import { useState } from "react";
 import {
   Shield, Instagram, ArrowRight, Lock, CheckCircle, Zap,
-  Smartphone, Star, ChevronRight
+  Smartphone, Star, ChevronRight, ChevronDown, Calculator
 } from "lucide-react";
 import { Page, display, mono } from "../types";
 import { SectionParticles } from "../components/SectionParticles";
 import { TaxEstimatorWidget } from "../components/TaxEstimatorWidget";
+import {
+  HraCalculatorDirect,
+  EmiCalculatorDirect,
+  SipCalculatorDirect,
+  PvFvCalculatorDirect
+} from "../components/InteractiveCalculators";
 
 interface HomePageProps {
   setPage: (p: Page) => void;
@@ -13,6 +19,7 @@ interface HomePageProps {
 
 export function HomePage({ setPage }: HomePageProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [expandedCalc, setExpandedCalc] = useState<number | null>(null);
   const [persona, setPersona] = useState<"salaried" | "retailer" | "freelancer">("salaried");
 
   const steps = [
@@ -227,45 +234,6 @@ export function HomePage({ setPage }: HomePageProps) {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
-              TESTIMONIALS
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground" style={display}>
-              Trusted by 10,000+ taxpayers
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map(({ name, city, role, quote, rating }) => (
-              <div
-                key={name}
-                className="bg-muted border border-border rounded-2xl p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-foreground leading-relaxed mb-6 italic text-sm">&ldquo;{quote}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm" style={display}>{name[0]}</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground text-sm">{name}</div>
-                    <div className="text-xs text-muted-foreground" style={mono}>{role} · {city}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Mobile App Promotion Section ── */}
       <section className="py-24 bg-background">
         <div className="max-w-6xl mx-auto px-6">
@@ -285,12 +253,12 @@ export function HomePage({ setPage }: HomePageProps) {
                 <p className="text-blue-100/70 text-sm leading-relaxed max-w-lg">
                   File your ITR, link Aadhaar/PAN, chat with your expert CA, and track your refund status instantly from our high-performance mobile app.
                 </p>
-
+                
                 <ul className="space-y-3.5 text-xs text-blue-100/80">
                   {[
                     "Guided mobile tax filing in under 10 minutes",
                     "Bank-grade 256-bit secure document uploads",
-                    "Direct chat support with dedicated tax advisors (CA Durgaprasad)",
+                    "Direct chat support with dedicated tax advisors (CA Surya)",
                     "Live refund tracking alerts and push notifications"
                   ].map((text) => (
                     <li key={text} className="flex items-center gap-2.5">
@@ -302,36 +270,40 @@ export function HomePage({ setPage }: HomePageProps) {
 
                 <div className="flex flex-wrap gap-4 pt-4">
                   {/* Google Play Button */}
-                  <a
-                    href="https://wa.me/918187882772?text=I%20want%20to%20download%20the%20D%20Tax%20Rail%20Android%20app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 bg-black hover:bg-slate-900 border border-white/10 text-white px-5 py-3 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/25"
-                  >
-                    <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
-                      <path d="M5 3.5c-.3 0-.6.1-.8.4L13.7 13l2.8-2.8L5.2 3.8c-.1-.2-.2-.3-.2-.3zM3.5 4.9L12.3 13.7 3.9 22.1c-.2-.2-.4-.5-.4-.8V5.7c0-.3.1-.6.2-.8zM14.4 15.8L5.5 24.7c.1.1.2.2.3.2.1 0 .2 0 .3-.1l11.1-6.4-2.8-2.6zM17.8 13.9l4-2.3c.3-.2.4-.5.4-.8s-.1-.6-.4-.8l-4-2.3L15 11.1l2.8 2.8z" />
-                    </svg>
-                    <div className="text-left leading-tight">
-                      <div className="text-[9px] uppercase tracking-wider text-muted-foreground" style={mono}>Get it on</div>
-                      <div className="text-xs font-bold font-sans">Google Play</div>
-                    </div>
-                  </a>
+                  <div className="relative">
+                    <a
+                      href="#"
+                      onClick={(e) => e.preventDefault()}
+                      className="flex items-center gap-3 bg-black border border-white/10 text-white px-5 py-3 rounded-xl transition-all opacity-80 cursor-default"
+                    >
+                      <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+                        <path d="M5 3.5c-.3 0-.6.1-.8.4L13.7 13l2.8-2.8L5.2 3.8c-.1-.2-.2-.3-.2-.3zM3.5 4.9L12.3 13.7 3.9 22.1c-.2-.2-.4-.5-.4-.8V5.7c0-.3.1-.6.2-.8zM14.4 15.8L5.5 24.7c.1.1.2.2.3.2.1 0 .2 0 .3-.1l11.1-6.4-2.8-2.6zM17.8 13.9l4-2.3c.3-.2.4-.5.4-.8s-.1-.6-.4-.8l-4-2.3L15 11.1l2.8 2.8z" />
+                      </svg>
+                      <div className="text-left leading-tight">
+                        <div className="text-[9px] uppercase tracking-wider text-muted-foreground" style={mono}>Get it on</div>
+                        <div className="text-xs font-bold font-sans">Google Play</div>
+                      </div>
+                    </a>
+                    <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">Coming Soon</span>
+                  </div>
 
                   {/* App Store Button */}
-                  <a
-                    href="https://wa.me/918187882772?text=I%20want%20to%20download%20the%20D%20Tax%20Rail%20iOS%20app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 bg-black hover:bg-slate-900 border border-white/10 text-white px-5 py-3 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/25"
-                  >
-                    <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
-                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.56 2.95-1.39z" />
-                    </svg>
-                    <div className="text-left leading-tight">
-                      <div className="text-[9px] uppercase tracking-wider text-muted-foreground" style={mono}>Download on the</div>
-                      <div className="text-xs font-bold font-sans">App Store</div>
-                    </div>
-                  </a>
+                  <div className="relative">
+                    <a
+                      href="#"
+                      onClick={(e) => e.preventDefault()}
+                      className="flex items-center gap-3 bg-black border border-white/10 text-white px-5 py-3 rounded-xl transition-all opacity-80 cursor-default"
+                    >
+                      <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.56 2.95-1.39z" />
+                      </svg>
+                      <div className="text-left leading-tight">
+                        <div className="text-[9px] uppercase tracking-wider text-muted-foreground" style={mono}>Download on the</div>
+                        <div className="text-xs font-bold font-sans">App Store</div>
+                      </div>
+                    </a>
+                    <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm z-10">Coming Soon</span>
+                  </div>
                 </div>
               </div>
 
@@ -392,7 +364,7 @@ export function HomePage({ setPage }: HomePageProps) {
                         <div className="flex items-center gap-1.5 pb-1 border-b border-white/5">
                           <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-[7px] font-bold">DP</div>
                           <div>
-                            <div className="font-bold text-[8px]">CA Durgaprasad</div>
+                            <div className="font-bold text-[8px]">CA Surya</div>
                             <div className="text-[6px] text-primary" style={mono}>Online</div>
                           </div>
                         </div>
@@ -413,6 +385,129 @@ export function HomePage({ setPage }: HomePageProps) {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Other Calculators (Explore) ── */}
+      <section className="py-20 bg-background">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+              TAX &amp; FINANCE TOOLS
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3" style={display}>
+              Other Calculators (Explore)
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              Use our suite of precise financial calculators to evaluate your HRA tax exemption, loan EMIs, SIP mutual fund returns, and money's purchasing power over time.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                num: "01",
+                title: "HRA Exemption Calculator",
+                iconBg: "bg-blue-50/70 dark:bg-blue-950/20",
+                iconColor: "text-blue-600 dark:text-blue-400",
+                accentColor: "border-blue-400/50",
+                component: <HraCalculatorDirect />
+              },
+              {
+                num: "02",
+                title: "Home & Personal Loan EMI Calculator",
+                iconBg: "bg-violet-50/70 dark:bg-violet-950/20",
+                iconColor: "text-violet-600 dark:text-violet-400",
+                accentColor: "border-violet-400/50",
+                component: <EmiCalculatorDirect />
+              },
+              {
+                num: "03",
+                title: "Systematic Investment Plan (SIP) Calculator",
+                iconBg: "bg-green-50/70 dark:bg-green-950/20",
+                iconColor: "text-green-600 dark:text-green-400",
+                accentColor: "border-green-400/50",
+                component: <SipCalculatorDirect />
+              },
+              {
+                num: "04",
+                title: "Present Value & Future Value Calculator",
+                iconBg: "bg-rose-50/70 dark:bg-rose-950/20",
+                iconColor: "text-rose-600 dark:text-rose-400",
+                accentColor: "border-rose-400/50",
+                component: <PvFvCalculatorDirect />
+              }
+            ].map(({ num, title, iconBg, iconColor, accentColor, component }, idx) => {
+              const isOpen = expandedCalc === idx;
+              return (
+                <div
+                  key={num}
+                  className={`bg-card border-2 rounded-3xl overflow-hidden transition-all duration-300 ${isOpen ? accentColor : "border-border"}`}
+                >
+                  <button
+                    onClick={() => setExpandedCalc(isOpen ? null : idx)}
+                    className="w-full flex items-center justify-between px-7 py-6 text-left hover:bg-muted/40 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="font-extrabold text-2xl text-muted-foreground/20 leading-none w-8 text-right flex-shrink-0" style={mono}>{num}</div>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                        <Calculator className={`w-5 h-5 ${iconColor}`} />
+                      </div>
+                      <h3 className="font-bold text-foreground text-base" style={display}>{title}</h3>
+                    </div>
+                    <div className={`w-8 h-8 rounded-full border border-border flex items-center justify-center flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? "rotate-180 bg-muted" : ""}`}>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-border p-4 bg-muted/10">
+                      {component}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+              TESTIMONIALS
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground" style={display}>
+              Trusted by 10,000+ taxpayers
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map(({ name, city, role, quote, rating }) => (
+              <div
+                key={name}
+                className="bg-muted border border-border rounded-2xl p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: rating }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-foreground leading-relaxed mb-6 italic text-sm">&ldquo;{quote}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm" style={display}>{name[0]}</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground text-sm">{name}</div>
+                    <div className="text-xs text-muted-foreground" style={mono}>{role} · {city}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

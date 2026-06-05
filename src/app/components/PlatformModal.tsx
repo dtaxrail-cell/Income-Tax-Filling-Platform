@@ -8,6 +8,79 @@ import { Page, display, mono } from "../types";
 import { calculateNewRegimeTax, calculateOldRegimeTax } from "../utils/taxSlabs";
 import confetti from "canvas-confetti";
 
+function ModalSliderInput({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  suffix = ""
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+}) {
+  const [raw, setRaw] = useState<string | null>(null);
+  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+
+  const display = raw !== null ? raw : Math.round(value).toLocaleString("en-IN");
+
+  const handleBlur = () => {
+    setRaw(null);
+    onChange(Math.min(max, Math.max(min, value)));
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawDigits = e.target.value.replace(/[^0-9.]/g, "");
+    setRaw(rawDigits);
+    const parsed = parseFloat(rawDigits);
+    if (!isNaN(parsed)) {
+      onChange(parsed);
+    }
+  };
+
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between items-center gap-4">
+        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+          {label}
+        </label>
+        <div className="flex items-center bg-white dark:bg-slate-800 border border-border rounded-lg px-2 py-1 shadow-sm w-[120px] focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all">
+          <input
+            type="text"
+            value={display}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onFocus={() => setRaw(String(value))}
+            className="w-full bg-transparent text-right text-xs font-bold text-foreground focus:outline-none tabular-nums"
+          />
+          {suffix && <span className="text-[10px] font-bold text-muted-foreground ml-1 select-none">{suffix}</span>}
+        </div>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => {
+          setRaw(null);
+          onChange(Number(e.target.value));
+        }}
+        className="w-full h-1 bg-blue-100 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+        style={{
+          background: `linear-gradient(to right, #1A56DB ${pct}%, #e5e7eb ${pct}%)`
+        }}
+      />
+    </div>
+  );
+}
+
 interface PlatformModalProps {
   activeService: string | null;
   onClose: () => void;
@@ -45,11 +118,38 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
   const [alertTopics, setAlertTopics] = useState<string[]>(["ITR", "AdvanceTax"]);
   const [alertSubscribed, setAlertSubscribed] = useState(false);
 
+  // States for HRA Calculator
+  const [hraBasicSalary, setHraBasicSalary] = useState(600000);
+  const [hraDa, setHraDa] = useState(120000);
+  const [hraReceived, setHraReceived] = useState(240000);
+  const [hraRentPaid, setHraRentPaid] = useState(180000);
+  const [hraIsMetro, setHraIsMetro] = useState(true);
+
+  // States for EMI Calculator
+  const [emiPrincipal, setEmiPrincipal] = useState(2500000);
+  const [emiRate, setEmiRate] = useState(8.5);
+  const [emiTenure, setEmiTenure] = useState(20);
+
+  // States for SIP Calculator
+  const [sipMonthly, setSipMonthly] = useState(10000);
+  const [sipRate, setSipRate] = useState(12);
+  const [sipTenure, setSipTenure] = useState(15);
+
+  // States for PV/FV Calculator
+  const [pvMode, setPvMode] = useState<"PV" | "FV">("PV");
+  const [pvAmount, setPvAmount] = useState(1000000);
+  const [pvRate, setPvRate] = useState(6);
+  const [pvTenure, setPvTenure] = useState(10);
+
   // Synced tab effect
   useEffect(() => {
     if (activeService) {
       if (activeService === "Platform" || activeService === "Overview") {
         setTab("Overview");
+      } else if (activeService === "ITR Form Selection") {
+        setTab("ITR Filing");
+      } else if (activeService === "Present Value Calculator") {
+        setTab("Present Value Calculator");
       } else {
         setTab(activeService);
       }
@@ -153,6 +253,39 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
   const taxSavings = Math.abs(oldTax - newTax);
   const netDueOrRefund = calcTdsPaid - (calcRegime === "new" ? newTax : oldTax);
 
+  // HRA Calculations
+  const actHra = hraReceived;
+  const totalSalary = hraBasicSalary + hraDa;
+  const rentExcess = Math.max(0, hraRentPaid - 0.1 * totalSalary);
+  const basicPct = (hraIsMetro ? 0.5 : 0.4) * totalSalary;
+  const hraExemption = Math.min(actHra, rentExcess, basicPct);
+  const taxableHra = Math.max(0, hraReceived - hraExemption);
+
+  // EMI Calculations
+  const emiMonthlyRate = emiRate / (12 * 100);
+  const emiMonths = emiTenure * 12;
+  const emiVal = emiMonthlyRate > 0 
+    ? (emiPrincipal * emiMonthlyRate * Math.pow(1 + emiMonthlyRate, emiMonths)) / (Math.pow(1 + emiMonthlyRate, emiMonths) - 1)
+    : emiPrincipal / emiMonths;
+  const emiTotalPayable = emiVal * emiMonths;
+  const emiTotalInterest = Math.max(0, emiTotalPayable - emiPrincipal);
+
+  // SIP Calculations
+  const sipMonthlyRate = sipRate / (12 * 100);
+  const sipMonths = sipTenure * 12;
+  const sipFV = sipMonthlyRate > 0
+    ? sipMonthly * ((Math.pow(1 + sipMonthlyRate, sipMonths) - 1) / sipMonthlyRate) * (1 + sipMonthlyRate)
+    : sipMonthly * sipMonths;
+  const sipTotalInvested = sipMonthly * sipMonths;
+  const sipReturns = Math.max(0, sipFV - sipTotalInvested);
+
+  // PV/FV Calculations
+  const pvDiscountRate = pvRate / 100;
+  const pvResult = pvMode === "PV"
+    ? pvAmount / Math.pow(1 + pvDiscountRate, pvTenure)
+    : pvAmount * Math.pow(1 + pvDiscountRate, pvTenure);
+  const pvDifference = Math.abs(pvAmount - pvResult);
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -163,10 +296,14 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
 
   const tabsList = [
     { name: "Overview", label: "Hub Index" },
-    { name: "ITR Filing", label: "ITR Filing" },
+    { name: "ITR Filing", label: "ITR Form Wizard" },
+    { name: "HRA Calculator", label: "HRA Calc" },
+    { name: "EMI Calculator", label: "EMI Calc" },
+    { name: "SIP Calculator", label: "SIP Calc" },
+    { name: "Present Value Calculator", label: "PV & FV Calc" },
     { name: "Refund Tracking", label: "Refund Track" },
     { name: "Document Management", label: "Doc Cabinet" },
-    { name: "Tax Calculator", label: "Calculator" },
+    { name: "Tax Calculator", label: "Regime Calc" },
     { name: "Compliance Alerts", label: "Tax Calendar" }
   ];
 
@@ -358,7 +495,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                         {itrMatchedForm === "ITR-1" && "ITR-1 (Sahaj) — For Salaried Individuals"}
                         {itrMatchedForm === "ITR-2" && "ITR-2 — For Capital Gains & Foreign Assets"}
                         {itrMatchedForm === "ITR-3" && "ITR-3 — For Business Owners & Audited Professionals"}
-                        {itrMatchedForm === "ITR-4" && "ITR-4 (Sugam) — For Presumptive Taxpayers"}
+                        {itrMatchedForm === "ITR-4" && "ITR-4 — For Presumptive Taxpayers"}
                         {itrMatchedForm === "No sources selected" && "Please select at least one income source."}
                       </div>
 
@@ -382,6 +519,458 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* HRA CALCULATOR TAB */}
+          {tab === "HRA Calculator" && (
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Info Column */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase" style={mono}>
+                  Tax Planning Tool
+                </div>
+                <h3 className="text-2xl font-bold text-foreground" style={display}>House Rent Allowance (HRA) Calculator</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  House Rent Allowance (HRA) is a salary component paid by employers to employees to meet their house rent expenses. 
+                  Under Section 10(13A) of the Income Tax Act, a portion of HRA is exempt from tax.
+                </p>
+                <div className="space-y-3.5 bg-muted/50 p-4 rounded-2xl border border-border">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-blue-500" /> HRA Exemption Rules
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    Tax exemption on HRA is calculated as the minimum of the following three parameters:
+                  </p>
+                  <ul className="space-y-2 text-xs text-muted-foreground list-disc pl-4">
+                    <li>Actual HRA received from your employer.</li>
+                    <li>Actual Rent paid minus 10% of your Basic salary (+DA).</li>
+                    <li>50% of Basic salary if you live in a Metro city (Delhi, Mumbai, Kolkata, Chennai), or 40% if you live in a Non-Metro city.</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Calculator Column */}
+              <div className="lg:col-span-7 bg-muted/20 border border-border rounded-3xl p-5 md:p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                    <Calculator className="w-5 h-5 text-blue-600" />
+                    <span className="text-sm font-bold text-foreground">HRA Deduction Estimator</span>
+                  </div>
+
+                  <ModalSliderInput
+                    label="Basic salary received"
+                    value={hraBasicSalary}
+                    onChange={setHraBasicSalary}
+                    min={50000}
+                    max={5000000}
+                    step={10000}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="Dearness Allowance (DA) received"
+                    value={hraDa}
+                    onChange={setHraDa}
+                    min={0}
+                    max={2000000}
+                    step={5000}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="HRA received"
+                    value={hraReceived}
+                    onChange={setHraReceived}
+                    min={10000}
+                    max={2000000}
+                    step={5000}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="Total Rent paid"
+                    value={hraRentPaid}
+                    onChange={setHraRentPaid}
+                    min={10000}
+                    max={2500000}
+                    step={5000}
+                    suffix="₹"
+                  />
+
+                  <div className="space-y-2 pt-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                      Do you live in Metro*?
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-xl w-[200px]">
+                      <button
+                        type="button"
+                        onClick={() => setHraIsMetro(true)}
+                        className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                          hraIsMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        }`}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHraIsMetro(false)}
+                        className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                          !hraIsMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        }`}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-green-50 border border-green-100 rounded-2xl p-4 text-left">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-green-700" style={mono}>Exempted HRA (Tax-Free)</div>
+                      <div className="text-xl font-extrabold text-green-600 mt-1">{formatCurrency(hraExemption)}</div>
+                      <div className="text-[8px] text-muted-foreground mt-0.5">Deduction under Section 10(13A)</div>
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-left">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700" style={mono}>Taxable HRA</div>
+                      <div className="text-xl font-extrabold text-amber-600 mt-1">{formatCurrency(taxableHra)}</div>
+                      <div className="text-[8px] text-muted-foreground mt-0.5">Added to gross taxable income</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Exemption Ratio</span>
+                      <span>{Math.round((hraExemption / Math.max(1, hraReceived)) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex">
+                      <div className="bg-green-500 h-1.5" style={{ width: `${(hraExemption / Math.max(1, hraReceived)) * 100}%` }} />
+                      <div className="bg-amber-500 h-1.5 flex-1" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EMI CALCULATOR TAB */}
+          {tab === "EMI Calculator" && (
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Info Column */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="inline-block bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase" style={mono}>
+                  Retail Loan Tool
+                </div>
+                <h3 className="text-2xl font-bold text-foreground" style={display}>Equated Monthly Installment (EMI) Calculator</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  An EMI is a fixed payment amount made by a borrower to a lender at a specified date each calendar month. 
+                  EMIs are used to pay off both interest and principal each month so that over a specified number of years, the loan is paid off in full.
+                </p>
+                <div className="space-y-3.5 bg-muted/50 p-4 rounded-2xl border border-border">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-indigo-500" /> EMI Repayment Formula
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    The monthly installment is calculated using compounding interest amortization:
+                  </p>
+                  <div className="text-center font-bold py-2 bg-white dark:bg-slate-900 border border-border rounded-lg text-primary text-xs" style={mono}>
+                    EMI = P × r × (1+r)ⁿ / ((1+r)ⁿ - 1)
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-tight">
+                    Where <strong>P</strong> is the Principal Loan Amount, <strong>r</strong> is the monthly interest rate (Annual Rate / 12 / 100), and <strong>n</strong> is the loan duration in months.
+                  </p>
+                </div>
+              </div>
+
+              {/* Calculator Column */}
+              <div className="lg:col-span-7 bg-muted/20 border border-border rounded-3xl p-5 md:p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                    <Calculator className="w-5 h-5 text-indigo-600" />
+                    <span className="text-sm font-bold text-foreground">Loan EMI Estimator</span>
+                  </div>
+
+                  <ModalSliderInput
+                    label="Loan Principal Amount"
+                    value={emiPrincipal}
+                    onChange={setEmiPrincipal}
+                    min={100000}
+                    max={15000000}
+                    step={50000}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="Interest Rate (Annual %)"
+                    value={emiRate}
+                    onChange={setEmiRate}
+                    min={3}
+                    max={20}
+                    step={0.1}
+                    suffix="%"
+                  />
+
+                  <ModalSliderInput
+                    label="Loan Tenure (Years)"
+                    value={emiTenure}
+                    onChange={setEmiTenure}
+                    min={1}
+                    max={30}
+                    step={1}
+                    suffix="Y"
+                  />
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border space-y-4">
+                  <div className="bg-[#0C1B33] text-white rounded-2xl p-4 text-center">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-blue-300" style={mono}>Monthly EMI Payment</span>
+                    <div className="text-2xl font-extrabold text-white mt-1">{formatCurrency(emiVal)}</div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2.5">
+                    <div className="bg-card border border-border rounded-xl p-3 text-center">
+                      <span className="text-[8px] text-muted-foreground block font-semibold uppercase">Principal Loan</span>
+                      <strong className="text-xs font-bold text-foreground block mt-1">{formatCurrency(emiPrincipal)}</strong>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-3 text-center">
+                      <span className="text-[8px] text-muted-foreground block font-semibold uppercase">Total Interest</span>
+                      <strong className="text-xs font-bold text-foreground block mt-1">{formatCurrency(emiTotalInterest)}</strong>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-3 text-center">
+                      <span className="text-[8px] text-muted-foreground block font-semibold uppercase">Total Amount</span>
+                      <strong className="text-xs font-bold text-foreground block mt-1">{formatCurrency(emiTotalPayable)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Interest: {Math.round((emiTotalInterest / Math.max(1, emiTotalPayable)) * 100)}%</span>
+                      <span>Principal: {Math.round((emiPrincipal / Math.max(1, emiTotalPayable)) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex">
+                      <div className="bg-red-400 h-1.5" style={{ width: `${(emiTotalInterest / Math.max(1, emiTotalPayable)) * 100}%` }} />
+                      <div className="bg-blue-500 h-1.5 flex-1" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SIP CALCULATOR TAB */}
+          {tab === "SIP Calculator" && (
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Info Column */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="inline-block bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase" style={mono}>
+                  Investment Planning
+                </div>
+                <h3 className="text-2xl font-bold text-foreground" style={display}>SIP Mutual Funds Calculator</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  A Systematic Investment Plan (SIP) is an investment route offered by mutual funds, where one can invest a fixed amount in a chosen mutual fund scheme periodically.
+                </p>
+                <div className="space-y-3.5 bg-muted/50 p-4 rounded-2xl border border-border">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-green-500" /> Wealth Creation via SIP
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    SIP leverages compounding returns over a long duration. The future value is calculated as:
+                  </p>
+                  <div className="text-center font-bold py-2 bg-white dark:bg-slate-900 border border-border rounded-lg text-primary text-[10px]" style={mono}>
+                    FV = P × [((1+i)ⁿ - 1) / i] × (1+i)
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-tight">
+                    Where <strong>P</strong> is the monthly installment, <strong>i</strong> is the monthly return rate (Expected Annual Return / 12 / 100), and <strong>n</strong> is the total number of months.
+                  </p>
+                </div>
+              </div>
+
+              {/* Calculator Column */}
+              <div className="lg:col-span-7 bg-muted/20 border border-border rounded-3xl p-5 md:p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                    <Calculator className="w-5 h-5 text-green-600" />
+                    <span className="text-sm font-bold text-foreground">SIP Wealth Estimator</span>
+                  </div>
+
+                  <ModalSliderInput
+                    label="Monthly Investment Amount"
+                    value={sipMonthly}
+                    onChange={setSipMonthly}
+                    min={500}
+                    max={500000}
+                    step={500}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="Expected Return Rate (Annual %)"
+                    value={sipRate}
+                    onChange={setSipRate}
+                    min={1}
+                    max={30}
+                    step={0.5}
+                    suffix="%"
+                  />
+
+                  <ModalSliderInput
+                    label="Investment Duration (Years)"
+                    value={sipTenure}
+                    onChange={setSipTenure}
+                    min={1}
+                    max={40}
+                    step={1}
+                    suffix="Y"
+                  />
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border space-y-4">
+                  <div className="bg-[#0C1B33] text-white rounded-2xl p-4 text-center">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-green-300" style={mono}>Estimated Future Value (Wealth)</span>
+                    <div className="text-2xl font-extrabold text-white mt-1">{formatCurrency(sipFV)}</div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-card border border-border rounded-xl p-3 text-center">
+                      <span className="text-[8px] text-muted-foreground block font-semibold uppercase">Invested Amount</span>
+                      <strong className="text-sm font-extrabold text-foreground block mt-1">{formatCurrency(sipTotalInvested)}</strong>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-3 text-center">
+                      <span className="text-[8px] text-muted-foreground block font-semibold uppercase">Est. Returns Gained</span>
+                      <strong className="text-sm font-extrabold text-green-600 block mt-1">{formatCurrency(sipReturns)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Invested: {Math.round((sipTotalInvested / Math.max(1, sipFV)) * 100)}%</span>
+                      <span>Returns: {Math.round((sipReturns / Math.max(1, sipFV)) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex">
+                      <div className="bg-blue-400 h-1.5" style={{ width: `${(sipTotalInvested / Math.max(1, sipFV)) * 100}%` }} />
+                      <div className="bg-green-500 h-1.5 flex-1" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PRESENT & FUTURE VALUE CALCULATOR TAB */}
+          {tab === "Present Value Calculator" && (
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Info Column */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="inline-block bg-rose-100 text-rose-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase" style={mono}>
+                  Inflation &amp; Time Value of Money
+                </div>
+                <h3 className="text-2xl font-bold text-foreground" style={display}>PV &amp; FV Wealth Calculator</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Money has time value due to inflation and interest-earning potential. A rupee today is worth more than a rupee tomorrow. This calculator shows how purchasing power erodes or grows over time.
+                </p>
+                <div className="space-y-3.5 bg-muted/50 p-4 rounded-2xl border border-border">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-rose-500" /> PV &amp; FV Discounting Rules
+                  </div>
+                  <ul className="space-y-2 text-xs text-muted-foreground list-disc pl-4">
+                    <li><strong>Present Value (PV) Mode:</strong> Tells you what a future target sum is worth in today's money, i.e., how much you need to save today to meet a future goal after inflation. Formula: <strong>PV = FV / (1 + r)ⁿ</strong></li>
+                    <li><strong>Future Value (FV) Mode:</strong> Tells you what today's savings will grow to in the future under a specific compound interest/inflation rate. Formula: <strong>FV = PV × (1 + r)ⁿ</strong></li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Calculator Column */}
+              <div className="lg:col-span-7 bg-muted/20 border border-border rounded-3xl p-5 md:p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                    <Calculator className="w-5 h-5 text-rose-600" />
+                    <span className="text-sm font-bold text-foreground">Time Value of Money Estimator</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                      Select Calculation Mode
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setPvMode("PV")}
+                        className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer text-center ${
+                          pvMode === "PV" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        }`}
+                      >
+                        Present Value (from Future Sum)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPvMode("FV")}
+                        className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer text-center ${
+                          pvMode === "FV" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        }`}
+                      >
+                        Future Value (from Present Sum)
+                      </button>
+                    </div>
+                  </div>
+
+                  <ModalSliderInput
+                    label={pvMode === "PV" ? "Future Target Value (FV)" : "Present Amount (PV)"}
+                    value={pvAmount}
+                    onChange={setPvAmount}
+                    min={10000}
+                    max={15000000}
+                    step={10000}
+                    suffix="₹"
+                  />
+
+                  <ModalSliderInput
+                    label="Annual Discount / Inflation / Growth Rate (%)"
+                    value={pvRate}
+                    onChange={setPvRate}
+                    min={1}
+                    max={25}
+                    step={0.5}
+                    suffix="%"
+                  />
+
+                  <ModalSliderInput
+                    label="Time Duration (Years)"
+                    value={pvTenure}
+                    onChange={setPvTenure}
+                    min={1}
+                    max={40}
+                    step={1}
+                    suffix="Y"
+                  />
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border space-y-4">
+                  <div className="bg-[#0C1B33] text-white rounded-2xl p-4 text-center">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-rose-300" style={mono}>
+                      {pvMode === "PV" ? "Calculated Present Value (Worth Today)" : "Calculated Future Value"}
+                    </span>
+                    <div className="text-2xl font-extrabold text-white mt-1">{formatCurrency(pvResult)}</div>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-2xl p-4 flex justify-between items-center text-xs">
+                    <div>
+                      <div className="text-[9px] font-bold uppercase text-muted-foreground tracking-wide" style={mono}>
+                        {pvMode === "PV" ? "Erosion in Purchasing Power (Inflation Loss)" : "Compound Growth Gained"}
+                      </div>
+                      <div className="text-base font-extrabold mt-1 text-rose-600">
+                        {formatCurrency(pvDifference)}
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground italic text-right max-w-[200px]">
+                      {pvMode === "PV" 
+                        ? `A sum of ${formatCurrency(pvAmount)} in ${pvTenure} years is equivalent to spending ${formatCurrency(pvResult)} today at ${pvRate}% inflation.`
+                        : `A sum of ${formatCurrency(pvAmount)} saved today will grow to ${formatCurrency(pvResult)} in ${pvTenure} years at ${pvRate}% compound interest.`}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -13,6 +13,7 @@ import { AboutPage } from "./pages/AboutPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { FutureExpansionPage } from "./pages/FutureExpansionPage";
 import { ContactPage } from "./pages/ContactPage";
+import { ItrFilingPage } from "./pages/ItrFilingPage";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function AppContent() {
     if (path.startsWith("/services")) return "services";
     if (path.startsWith("/future")) return "future";
     if (path.startsWith("/contact")) return "contact";
+    if (path.startsWith("/itr-filing")) return "itr-filing";
     return "home";
   };
 
@@ -51,6 +53,7 @@ function AppContent() {
           <Route path="/services" element={<ServicesPage setPage={setPageAndScroll} />} />
           <Route path="/future" element={<FutureExpansionPage setPage={setPageAndScroll} />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/itr-filing" element={<ItrFilingPage setPage={setPageAndScroll} />} />
           <Route path="*" element={<HomePage setPage={setPageAndScroll} />} />
         </Routes>
       </main>
