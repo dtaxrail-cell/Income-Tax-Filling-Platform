@@ -149,11 +149,11 @@ export function TaxEstimatorWidget({ persona, setPersona, setPage }: Props) {
   const [fy, setFy] = useState<FY>("2025-26");
   const [internalPersona, setInternalPersona] = useState<PersonaType>("salaried");
   const [age, setAge] = useState<AgeCategory>("general");
-  const [grossIncome, setGrossIncome] = useState(1800000);
-  const [exemptions, setExemptions] = useState(20000);
-  const [deductions, setDeductions] = useState(150000);
-  const [nps, setNps] = useState(15000);
-  const [tdsPaid, setTdsPaid] = useState(20000);
+  const [grossIncome, setGrossIncome] = useState(0);
+  const [exemptions, setExemptions] = useState(0);
+  const [deductions, setDeductions] = useState(0);
+  const [nps, setNps] = useState(0);
+  const [tdsPaid, setTdsPaid] = useState(0);
 
   const syncPersona = (p: PersonaType) => {
     setInternalPersona(p);

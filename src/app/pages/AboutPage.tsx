@@ -76,7 +76,7 @@ export function AboutPage({ setPage }: AboutPageProps) {
               { icon: Lock, title: "Secure Data Handling", desc: "Bank-grade 256-bit encryption protects your financial data at every stage.", iconBg: "bg-green-50", iconColor: "text-green-600" },
               { icon: Zap, title: "Fast Filing Process", desc: "Most returns are processed and filed within 24 hours of document submission.", iconBg: "bg-amber-50", iconColor: "text-amber-600" },
               { icon: Eye, title: "Transparent Tracking", desc: "Real-time updates on every step of your filing, verification, and refund journey.", iconBg: "bg-violet-50", iconColor: "text-violet-600" },
-              { icon: Globe, title: "Multilingual Support", desc: "Assistance in Hindi, Tamil, Telugu, Marathi, Kannada, and other regional languages.", iconBg: "bg-rose-50", iconColor: "text-rose-600" },
+              { icon: Globe, title: "Multilingual Support", desc: "Assistance in English, Hindi, Telugu, Tamil, Malayalam, and other regional languages.", iconBg: "bg-rose-50", iconColor: "text-rose-600" },
               { icon: Award, title: "98% Satisfaction Rate", desc: "Trusted by over 10,000 taxpayers with near-perfect customer satisfaction scores.", iconBg: "bg-teal-50", iconColor: "text-teal-600" },
             ].map(({ icon: Icon, title, desc, iconBg, iconColor }) => (
               <div key={title} className="bg-card border border-border rounded-2xl p-6 hover:shadow-md transition-shadow">

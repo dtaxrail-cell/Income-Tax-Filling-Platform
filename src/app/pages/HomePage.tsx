@@ -174,31 +174,6 @@ export function HomePage({ setPage }: HomePageProps) {
         </div>
       </section>
 
-      {/* ── Trust Badges ── */}
-      <section className="bg-white border-y border-border py-10">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Lock, title: "Secure Data Protection", desc: "256-bit SSL Encryption", iconBg: "bg-blue-50", iconColor: "text-blue-600" },
-              { icon: CheckCircle, title: "Trusted Tax Experts", desc: "CA-assisted filing", iconBg: "bg-green-50", iconColor: "text-green-600" },
-              { icon: Zap, title: "Fast Processing", desc: "Filed within 24 hours", iconBg: "bg-amber-50", iconColor: "text-amber-600" },
-              { icon: Smartphone, title: "Mobile Access", desc: "All devices supported", iconBg: "bg-violet-50", iconColor: "text-violet-600" },
-            ].map(({ icon: Icon, title, desc, iconBg, iconColor }) => (
-              <div
-                key={title}
-                className="flex flex-col items-center text-center p-5 rounded-2xl border border-border hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${iconBg}`}>
-                  <Icon className={`w-5 h-5 ${iconColor}`} />
-                </div>
-                <div className="font-semibold text-foreground text-sm mb-0.5">{title}</div>
-                <div className="text-xs text-muted-foreground" style={mono}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── How It Works ── */}
       <section className="py-24 bg-[#0C1B33] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/40 via-transparent to-blue-950/40 opacity-70 animate-pulse" style={{ animationDuration: "12s" }} />
@@ -234,6 +209,163 @@ export function HomePage({ setPage }: HomePageProps) {
         </div>
       </section>
 
+      {/* ── Calculators and ITR Filing Form Selection ── */}
+      <section className="py-20 bg-background">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+              TAX &amp; FINANCE TOOLS
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3" style={display}>
+              Calculators and ITR Filling form selection
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              Use our suite of precise financial calculators to evaluate your HRA tax exemption, loan EMIs, SIP mutual fund returns, and money's purchasing power over time.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                num: "01",
+                title: "HRA Exemption Calculator",
+                iconBg: "bg-blue-50/70 dark:bg-blue-950/20",
+                iconColor: "text-blue-600 dark:text-blue-400",
+                accentColor: "border-blue-400/50",
+                component: <HraCalculatorDirect />
+              },
+              {
+                num: "02",
+                title: "Home & Personal Loan EMI Calculator",
+                iconBg: "bg-violet-50/70 dark:bg-violet-950/20",
+                iconColor: "text-violet-600 dark:text-violet-400",
+                accentColor: "border-violet-400/50",
+                component: <EmiCalculatorDirect />
+              },
+              {
+                num: "03",
+                title: "Systematic Investment Plan (SIP) Calculator",
+                iconBg: "bg-green-50/70 dark:bg-green-950/20",
+                iconColor: "text-green-600 dark:text-green-400",
+                accentColor: "border-green-400/50",
+                component: <SipCalculatorDirect />
+              },
+              {
+                num: "04",
+                title: "Present Value & Future Value Calculator",
+                iconBg: "bg-rose-50/70 dark:bg-rose-950/20",
+                iconColor: "text-rose-600 dark:text-rose-400",
+                accentColor: "border-rose-400/50",
+                component: <PvFvCalculatorDirect />
+              }
+            ].map(({ num, title, iconBg, iconColor, accentColor, component }, idx) => {
+              const isOpen = expandedCalc === idx;
+              return (
+                <div
+                  key={num}
+                  className={`bg-card border-2 rounded-3xl overflow-hidden transition-all duration-300 ${isOpen ? accentColor : "border-border"}`}
+                >
+                  <button
+                    onClick={() => setExpandedCalc(isOpen ? null : idx)}
+                    className="w-full flex items-center justify-between px-7 py-6 text-left hover:bg-muted/40 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="font-extrabold text-2xl text-muted-foreground/20 leading-none w-8 text-right flex-shrink-0" style={mono}>{num}</div>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                        <Calculator className={`w-5 h-5 ${iconColor}`} />
+                      </div>
+                      <h3 className="font-bold text-foreground text-base" style={display}>{title}</h3>
+                    </div>
+                    <div className={`w-8 h-8 rounded-full border border-border flex items-center justify-center flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? "rotate-180 bg-muted" : ""}`}>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-border p-4 bg-muted/10">
+                      {component}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ITR filing form selection section */}
+          <div className="mt-20 border-t border-border pt-16">
+            <div className="text-center mb-10">
+              <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+                ITR SELECTION
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3" style={display}>
+                ITR Filing Form Selection
+              </h3>
+              <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+                Select your applicable Income Tax Return (ITR) form to view details, eligibility guidelines, and document checklists.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { name: "ITR-1", label: "Salaried", desc: "Salaried individuals & Pensioners (< ₹50L)" },
+                { name: "ITR-2", label: "Capital Gains", desc: "Capital gains, foreign assets, multiple houses" },
+                { name: "ITR-3", label: "Proprietorship & F&O", desc: "Business, professional income, F&O/Crypto" },
+                { name: "ITR-4", label: "Presumptive", desc: "Presumptive business & profession (< ₹50L)" },
+                { name: "ITR-5", label: "LLPs & Firms", desc: "Partnerships, LLPs, AOPs, BOIs" },
+                { name: "ITR-6", label: "Companies", desc: "Corporates & Registered Companies" },
+                { name: "ITR-7", label: "Trusts & Orgs", desc: "Charitable, political, educational trusts" },
+              ].map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => setPage("itr-filing")}
+                  className="bg-card border-2 border-border hover:border-primary/40 rounded-3xl p-6 text-left transition-all hover:shadow-md group flex flex-col justify-between h-full cursor-pointer text-foreground"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="font-extrabold text-lg text-foreground" style={display}>{item.name}</span>
+                      <span className="text-[9px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full uppercase" style={mono}>
+                        {item.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                      {item.desc}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-primary font-bold mt-auto group-hover:translate-x-0.5 transition-transform">
+                    View Guidelines <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trust Badges (Secure Data Protection) ── */}
+      <section className="bg-white border-y border-border py-10">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: Lock, title: "Secure Data Protection", desc: "256-bit SSL Encryption", iconBg: "bg-blue-50", iconColor: "text-blue-600" },
+              { icon: CheckCircle, title: "Trusted Tax Experts", desc: "CA-assisted filing", iconBg: "bg-green-50", iconColor: "text-green-600" },
+              { icon: Zap, title: "Fast Processing", desc: "Filed within 24 hours", iconBg: "bg-amber-50", iconColor: "text-amber-600" },
+              { icon: Smartphone, title: "Mobile Access", desc: "All devices supported", iconBg: "bg-violet-50", iconColor: "text-violet-600" },
+            ].map(({ icon: Icon, title, desc, iconBg, iconColor }) => (
+              <div
+                key={title}
+                className="flex flex-col items-center text-center p-5 rounded-2xl border border-border hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${iconBg}`}>
+                  <Icon className={`w-5 h-5 ${iconColor}`} />
+                </div>
+                <div className="font-semibold text-foreground text-sm mb-0.5">{title}</div>
+                <div className="text-xs text-muted-foreground" style={mono}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Mobile App Promotion Section ── */}
       <section className="py-24 bg-background">
         <div className="max-w-6xl mx-auto px-6">
@@ -258,7 +390,7 @@ export function HomePage({ setPage }: HomePageProps) {
                   {[
                     "Guided mobile tax filing in under 10 minutes",
                     "Bank-grade 256-bit secure document uploads",
-                    "Direct chat support with dedicated tax advisors (CA Surya)",
+                    "Direct chat support with dedicated tax advisors (our CA Team)",
                     "Live refund tracking alerts and push notifications"
                   ].map((text) => (
                     <li key={text} className="flex items-center gap-2.5">
@@ -355,16 +487,16 @@ export function HomePage({ setPage }: HomePageProps) {
                       {/* Refund Card */}
                       <div className="bg-gradient-to-r from-emerald-950 to-teal-950 border border-emerald-500/20 p-2.5 rounded-xl">
                         <div className="text-[7px] text-emerald-400 uppercase font-bold" style={mono}>Estimated Refund</div>
-                        <div className="text-sm font-extrabold text-green-400 mt-0.5">₹27,970</div>
+                        <div className="text-sm font-extrabold text-green-400 mt-0.5">₹56,603</div>
                         <div className="text-[6px] text-emerald-300/80 mt-1">CPC status: Sent for E-Verification</div>
                       </div>
 
                       {/* Live Chat Notification */}
                       <div className="bg-slate-950/80 border border-white/5 p-2.5 rounded-xl space-y-2">
                         <div className="flex items-center gap-1.5 pb-1 border-b border-white/5">
-                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-[7px] font-bold">DP</div>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-[7px] font-bold">CA</div>
                           <div>
-                            <div className="font-bold text-[8px]">CA Surya</div>
+                            <div className="font-bold text-[8px]">CA Team</div>
                             <div className="text-[6px] text-primary" style={mono}>Online</div>
                           </div>
                         </div>
@@ -385,90 +517,6 @@ export function HomePage({ setPage }: HomePageProps) {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Other Calculators (Explore) ── */}
-      <section className="py-20 bg-background">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
-              TAX &amp; FINANCE TOOLS
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3" style={display}>
-              Other Calculators (Explore)
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-              Use our suite of precise financial calculators to evaluate your HRA tax exemption, loan EMIs, SIP mutual fund returns, and money's purchasing power over time.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                num: "01",
-                title: "HRA Exemption Calculator",
-                iconBg: "bg-blue-50/70 dark:bg-blue-950/20",
-                iconColor: "text-blue-600 dark:text-blue-400",
-                accentColor: "border-blue-400/50",
-                component: <HraCalculatorDirect />
-              },
-              {
-                num: "02",
-                title: "Home & Personal Loan EMI Calculator",
-                iconBg: "bg-violet-50/70 dark:bg-violet-950/20",
-                iconColor: "text-violet-600 dark:text-violet-400",
-                accentColor: "border-violet-400/50",
-                component: <EmiCalculatorDirect />
-              },
-              {
-                num: "03",
-                title: "Systematic Investment Plan (SIP) Calculator",
-                iconBg: "bg-green-50/70 dark:bg-green-950/20",
-                iconColor: "text-green-600 dark:text-green-400",
-                accentColor: "border-green-400/50",
-                component: <SipCalculatorDirect />
-              },
-              {
-                num: "04",
-                title: "Present Value & Future Value Calculator",
-                iconBg: "bg-rose-50/70 dark:bg-rose-950/20",
-                iconColor: "text-rose-600 dark:text-rose-400",
-                accentColor: "border-rose-400/50",
-                component: <PvFvCalculatorDirect />
-              }
-            ].map(({ num, title, iconBg, iconColor, accentColor, component }, idx) => {
-              const isOpen = expandedCalc === idx;
-              return (
-                <div
-                  key={num}
-                  className={`bg-card border-2 rounded-3xl overflow-hidden transition-all duration-300 ${isOpen ? accentColor : "border-border"}`}
-                >
-                  <button
-                    onClick={() => setExpandedCalc(isOpen ? null : idx)}
-                    className="w-full flex items-center justify-between px-7 py-6 text-left hover:bg-muted/40 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-5">
-                      <div className="font-extrabold text-2xl text-muted-foreground/20 leading-none w-8 text-right flex-shrink-0" style={mono}>{num}</div>
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
-                        <Calculator className={`w-5 h-5 ${iconColor}`} />
-                      </div>
-                      <h3 className="font-bold text-foreground text-base" style={display}>{title}</h3>
-                    </div>
-                    <div className={`w-8 h-8 rounded-full border border-border flex items-center justify-center flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? "rotate-180 bg-muted" : ""}`}>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </button>
-
-                  {isOpen && (
-                    <div className="border-t border-border p-4 bg-muted/10">
-                      {component}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>

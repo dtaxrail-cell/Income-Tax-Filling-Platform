@@ -106,9 +106,9 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
   const [scanResult, setScanResult] = useState<{ salary: number; tds: number; deduction80c: number } | null>(null);
 
   // States for Tax Calculator
-  const [calcIncome, setCalcIncome] = useState(1200000);
-  const [calcDeductions, setCalcDeductions] = useState(150000);
-  const [calcTdsPaid, setCalcTdsPaid] = useState(80000);
+  const [calcIncome, setCalcIncome] = useState(0);
+  const [calcDeductions, setCalcDeductions] = useState(0);
+  const [calcTdsPaid, setCalcTdsPaid] = useState(0);
   const [calcRegime, setCalcRegime] = useState<"new" | "old">("new");
 
   // States for Compliance Alerts
@@ -119,27 +119,27 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
   const [alertSubscribed, setAlertSubscribed] = useState(false);
 
   // States for HRA Calculator
-  const [hraBasicSalary, setHraBasicSalary] = useState(600000);
-  const [hraDa, setHraDa] = useState(120000);
-  const [hraReceived, setHraReceived] = useState(240000);
-  const [hraRentPaid, setHraRentPaid] = useState(180000);
+  const [hraBasicSalary, setHraBasicSalary] = useState(0);
+  const [hraDa, setHraDa] = useState(0);
+  const [hraReceived, setHraReceived] = useState(0);
+  const [hraRentPaid, setHraRentPaid] = useState(0);
   const [hraIsMetro, setHraIsMetro] = useState(true);
 
   // States for EMI Calculator
-  const [emiPrincipal, setEmiPrincipal] = useState(2500000);
-  const [emiRate, setEmiRate] = useState(8.5);
-  const [emiTenure, setEmiTenure] = useState(20);
+  const [emiPrincipal, setEmiPrincipal] = useState(0);
+  const [emiRate, setEmiRate] = useState(0);
+  const [emiTenure, setEmiTenure] = useState(0);
 
   // States for SIP Calculator
-  const [sipMonthly, setSipMonthly] = useState(10000);
-  const [sipRate, setSipRate] = useState(12);
-  const [sipTenure, setSipTenure] = useState(15);
+  const [sipMonthly, setSipMonthly] = useState(0);
+  const [sipRate, setSipRate] = useState(0);
+  const [sipTenure, setSipTenure] = useState(0);
 
   // States for PV/FV Calculator
   const [pvMode, setPvMode] = useState<"PV" | "FV">("PV");
-  const [pvAmount, setPvAmount] = useState(1000000);
-  const [pvRate, setPvRate] = useState(6);
-  const [pvTenure, setPvTenure] = useState(10);
+  const [pvAmount, setPvAmount] = useState(0);
+  const [pvRate, setPvRate] = useState(0);
+  const [pvTenure, setPvTenure] = useState(0);
 
   // Synced tab effect
   useEffect(() => {
@@ -264,9 +264,11 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
   // EMI Calculations
   const emiMonthlyRate = emiRate / (12 * 100);
   const emiMonths = emiTenure * 12;
-  const emiVal = emiMonthlyRate > 0 
-    ? (emiPrincipal * emiMonthlyRate * Math.pow(1 + emiMonthlyRate, emiMonths)) / (Math.pow(1 + emiMonthlyRate, emiMonths) - 1)
-    : emiPrincipal / emiMonths;
+  const emiVal = emiMonths > 0
+    ? (emiMonthlyRate > 0 
+        ? (emiPrincipal * emiMonthlyRate * Math.pow(1 + emiMonthlyRate, emiMonths)) / (Math.pow(1 + emiMonthlyRate, emiMonths) - 1)
+        : emiPrincipal / emiMonths)
+    : 0;
   const emiTotalPayable = emiVal * emiMonths;
   const emiTotalInterest = Math.max(0, emiTotalPayable - emiPrincipal);
 
@@ -492,7 +494,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                       </div>
                       
                       <div className="text-xs font-bold mb-1">
-                        {itrMatchedForm === "ITR-1" && "ITR-1 (Sahaj) — For Salaried Individuals"}
+                        {itrMatchedForm === "ITR-1" && "ITR-1 — For Salaried Individuals"}
                         {itrMatchedForm === "ITR-2" && "ITR-2 — For Capital Gains & Foreign Assets"}
                         {itrMatchedForm === "ITR-3" && "ITR-3 — For Business Owners & Audited Professionals"}
                         {itrMatchedForm === "ITR-4" && "ITR-4 — For Presumptive Taxpayers"}
@@ -564,7 +566,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Basic salary received"
                     value={hraBasicSalary}
                     onChange={setHraBasicSalary}
-                    min={50000}
+                    min={0}
                     max={5000000}
                     step={10000}
                     suffix="₹"
@@ -584,7 +586,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="HRA received"
                     value={hraReceived}
                     onChange={setHraReceived}
-                    min={10000}
+                    min={0}
                     max={2000000}
                     step={5000}
                     suffix="₹"
@@ -594,7 +596,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Total Rent paid"
                     value={hraRentPaid}
                     onChange={setHraRentPaid}
-                    min={10000}
+                    min={0}
                     max={2500000}
                     step={5000}
                     suffix="₹"
@@ -698,7 +700,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Loan Principal Amount"
                     value={emiPrincipal}
                     onChange={setEmiPrincipal}
-                    min={100000}
+                    min={0}
                     max={15000000}
                     step={50000}
                     suffix="₹"
@@ -708,7 +710,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Interest Rate (Annual %)"
                     value={emiRate}
                     onChange={setEmiRate}
-                    min={3}
+                    min={0}
                     max={20}
                     step={0.1}
                     suffix="%"
@@ -718,7 +720,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Loan Tenure (Years)"
                     value={emiTenure}
                     onChange={setEmiTenure}
-                    min={1}
+                    min={0}
                     max={30}
                     step={1}
                     suffix="Y"
@@ -801,7 +803,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Monthly Investment Amount"
                     value={sipMonthly}
                     onChange={setSipMonthly}
-                    min={500}
+                    min={0}
                     max={500000}
                     step={500}
                     suffix="₹"
@@ -811,7 +813,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Expected Return Rate (Annual %)"
                     value={sipRate}
                     onChange={setSipRate}
-                    min={1}
+                    min={0}
                     max={30}
                     step={0.5}
                     suffix="%"
@@ -821,7 +823,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Investment Duration (Years)"
                     value={sipTenure}
                     onChange={setSipTenure}
-                    min={1}
+                    min={0}
                     max={40}
                     step={1}
                     suffix="Y"
@@ -921,7 +923,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label={pvMode === "PV" ? "Future Target Value (FV)" : "Present Amount (PV)"}
                     value={pvAmount}
                     onChange={setPvAmount}
-                    min={10000}
+                    min={0}
                     max={15000000}
                     step={10000}
                     suffix="₹"
@@ -931,7 +933,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Annual Discount / Inflation / Growth Rate (%)"
                     value={pvRate}
                     onChange={setPvRate}
-                    min={1}
+                    min={0}
                     max={25}
                     step={0.5}
                     suffix="%"
@@ -941,7 +943,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                     label="Time Duration (Years)"
                     value={pvTenure}
                     onChange={setPvTenure}
-                    min={1}
+                    min={0}
                     max={40}
                     step={1}
                     suffix="Y"
@@ -1243,7 +1245,7 @@ export function PlatformModal({ activeService, onClose, setPage }: PlatformModal
                       </div>
                       <input
                         type="range"
-                        min={300000}
+                        min={0}
                         max={3000000}
                         step={50000}
                         value={calcIncome}

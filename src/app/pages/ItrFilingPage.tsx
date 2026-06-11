@@ -29,7 +29,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
   const [activeTab, setActiveTab] = useState<ItrTab>("itr-1");
 
   const tabs = [
-    { id: "itr-1", name: "ITR-1", label: "Sahaj", desc: "Salaried individuals & Pensioners (< ₹50L)" },
+    { id: "itr-1", name: "ITR-1", label: "Salaried", desc: "Salaried individuals & Pensioners (< ₹50L)" },
     { id: "itr-2", name: "ITR-2", label: "Capital Gains", desc: "Capital gains, foreign assets, multiple houses" },
     { id: "itr-3", name: "ITR-3", nameLong: "ITR-3 (Business & Profession)", label: "Proprietorship & F&O", desc: "Business, professional income, F&O/Crypto" },
     { id: "itr-4", name: "ITR-4", label: "Presumptive", desc: "Presumptive business & profession (< ₹50L)" },
@@ -53,7 +53,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
           </h1>
           <p className="text-blue-100/75 text-base sm:text-lg leading-relaxed max-w-3xl mx-auto">
             Selecting the wrong ITR form can lead to defect notices (u/s 139(9)) and penalties. 
-            Review the comprehensive rules verified by <strong className="text-white">CA Surya</strong> to ensure accurate, compliant, and timely filing.
+            Review the comprehensive rules verified by <strong className="text-white">our expert CA Team</strong> to ensure accurate, compliant, and timely filing.
           </p>
         </div>
       </section>
@@ -70,7 +70,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
                 Unsure which ITR form applies to your income?
               </h3>
               <p className="text-sm text-muted-foreground max-w-xl">
-                Different income combinations mandate different forms. Check our quick guide below or consult with CA Surya directly for professional classification.
+                Different income combinations mandate different forms. Check our quick guide below or consult with our CA Team directly for professional classification.
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0 w-full md:w-auto">
@@ -80,7 +80,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
                 rel="noopener noreferrer"
                 className="w-full md:w-auto text-center bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
               >
-                Ask CA Surya
+                Ask our CA Team
               </a>
             </div>
           </div>
@@ -135,16 +135,16 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
 
             {/* Right Column: Tab Content */}
             <div className="lg:col-span-3 space-y-6">
-              {/* ITR-1 (Sahaj) */}
+              {/* ITR-1 */}
               {activeTab === "itr-1" && (
                 <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-8 animate-fadeIn">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-border">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full" style={mono}>Individual Resident</span>
-                        <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full" style={mono}>Sahaj</span>
+                        <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full" style={mono}>Salaried</span>
                       </div>
-                      <h3 className="text-3xl font-extrabold text-foreground mt-2" style={display}>ITR-1 (Sahaj)</h3>
+                      <h3 className="text-3xl font-extrabold text-foreground mt-2" style={display}>ITR-1</h3>
                       <p className="text-sm text-muted-foreground mt-1">Simplest tax filing form for individuals with income up to ₹50 Lakhs.</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-900 border border-border p-4 rounded-2xl text-center flex-shrink-0">
@@ -658,7 +658,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
                 <tbody className="divide-y divide-border text-sm text-muted-foreground">
                   {[
                     {
-                      form: "ITR-1 (Sahaj)",
+                      form: "ITR-1",
                       to: "Resident Individuals",
                       sources: "Salary, 1 House Property, Other Sources, Agri <= ₹5K",
                       limit: "₹50 Lakhs",
@@ -722,7 +722,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
         </div>
       </section>
 
-      {/* CA Surya Professional CTA Banner */}
+      {/* CA Team Professional CTA Banner */}
       <section className="bg-primary py-20 relative overflow-hidden">
         <SectionParticles />
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-8">
@@ -730,11 +730,11 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
             <ShieldCheck className="w-4 h-4 text-blue-400" /> EXPERT CA FILING SERVICES
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight" style={display}>
-            Let CA Surya File Your Return Accurately
+            Let our CA Team File Your Return Accurately
           </h2>
           <p className="text-blue-100/75 text-base sm:text-lg max-w-2xl mx-auto">
             Avoid errors, maximize deductions (Section 80C, 80D, 10(13A), etc.), and ensure a stress-free tax season. 
-            File under the professional guidance of CA Surya.
+            File under the professional guidance of our CA Team.
           </p>
 
           <div className="bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto grid sm:grid-cols-2 gap-6 text-left items-center backdrop-blur-sm">
@@ -744,8 +744,8 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
                   <User className="w-5 h-5 text-blue-300" />
                 </div>
                 <div>
-                  <div className="font-extrabold text-white text-base" style={display}>CA Surya</div>
-                  <div className="text-xs text-blue-300 font-semibold" style={mono}>Taxation &amp; Audit Professional</div>
+                  <div className="font-extrabold text-white text-base" style={display}>CA Team</div>
+                  <div className="text-xs text-blue-300 font-semibold" style={mono}>dtaxrail@gmail.com</div>
                 </div>
               </div>
               <div className="space-y-1.5 text-xs text-blue-200">
