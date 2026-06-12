@@ -4,9 +4,10 @@ import { Page, display, mono } from "../types";
 interface FooterProps {
   setPage: (p: Page) => void;
   onSelectService: (serviceName: string) => void;
+  onSelectCalculator?: (calcIndex: number) => void;
 }
 
-export function Footer({ setPage, onSelectService }: FooterProps) {
+export function Footer({ setPage, onSelectService, onSelectCalculator }: FooterProps) {
   return (
     <footer className="bg-[#080F1E] text-blue-200/60">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -53,16 +54,14 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
                   Tax Calculator
                 </button>
               </li>
-              {/* 
               <li>
                 <button
-                  onClick={() => onSelectService("HRA Calculator")}
+                  onClick={() => onSelectCalculator?.(0)}
                   className="hover:text-white text-left transition-colors cursor-pointer"
                 >
                   HRA Calculator
                 </button>
               </li>
-              */}
               <li>
                 <button
                   onClick={() => setPage("itr-filing")}
@@ -71,10 +70,9 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
                   ITR Filing
                 </button>
               </li>
-              {/* 
               <li>
                 <button
-                  onClick={() => onSelectService("EMI Calculator")}
+                  onClick={() => onSelectCalculator?.(1)}
                   className="hover:text-white text-left transition-colors cursor-pointer"
                 >
                   EMI Calculator
@@ -82,7 +80,7 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
               </li>
               <li>
                 <button
-                  onClick={() => onSelectService("SIP Calculator")}
+                  onClick={() => onSelectCalculator?.(2)}
                   className="hover:text-white text-left transition-colors cursor-pointer"
                 >
                   SIP Calculator
@@ -90,13 +88,12 @@ export function Footer({ setPage, onSelectService }: FooterProps) {
               </li>
               <li>
                 <button
-                  onClick={() => onSelectService("Present Value Calculator")}
+                  onClick={() => onSelectCalculator?.(3)}
                   className="hover:text-white text-left transition-colors cursor-pointer"
                 >
                   Present Value Calculator
                 </button>
               </li>
-              */}
             </ul>
           </div>
 

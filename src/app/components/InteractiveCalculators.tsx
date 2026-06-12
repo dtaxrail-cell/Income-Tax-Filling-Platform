@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calculator, Info, Sparkles } from "lucide-react";
+import { Calculator, Info, Sparkles, ChevronDown } from "lucide-react";
 import { display, mono } from "../types";
 
 function CalcSliderInput({
@@ -87,7 +87,11 @@ export function HraCalculatorDirect() {
   const [hraDa, setHraDa] = useState(0);
   const [hraReceived, setHraReceived] = useState(0);
   const [hraRentPaid, setHraRentPaid] = useState(0);
-  const [hraIsMetro, setHraIsMetro] = useState(true);
+  const [hraCity, setHraCity] = useState("delhi");
+  const [customCity, setCustomCity] = useState("");
+
+  const activeCity = hraCity === "other" ? customCity : hraCity;
+  const hraIsMetro = ["delhi", "mumbai", "kolkata", "chennai"].includes(activeCity.trim().toLowerCase());
 
   const actHra = hraReceived;
   const totalSalary = hraBasicSalary + hraDa;
@@ -144,29 +148,52 @@ export function HraCalculatorDirect() {
           suffix="₹"
         />
 
-        <div className="space-y-2 pt-2">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-            Do you live in Metro*?
-          </label>
-          <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-xl w-[200px]">
-            <button
-              type="button"
-              onClick={() => setHraIsMetro(true)}
-              className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                hraIsMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
-              }`}
-            >
-              Yes
-            </button>
-            <button
-              type="button"
-              onClick={() => setHraIsMetro(false)}
-              className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                !hraIsMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
-              }`}
-            >
-              No
-            </button>
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
+              City of Residence*
+            </label>
+            <div className="relative w-full max-w-[250px]">
+              <select
+                value={hraCity}
+                onChange={(e) => setHraCity(e.target.value)}
+                className="w-full bg-white dark:bg-slate-800 border border-border rounded-lg px-3 py-1.5 pr-8 text-xs font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer appearance-none"
+              >
+                <option value="delhi">Delhi (Metro)</option>
+                <option value="mumbai">Mumbai (Metro)</option>
+                <option value="kolkata">Kolkata (Metro)</option>
+                <option value="chennai">Chennai (Metro)</option>
+                <option value="bangalore">Bangalore</option>
+                <option value="hyderabad">Hyderabad</option>
+                <option value="pune">Pune</option>
+                <option value="other">Other (Specify)</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-muted-foreground">
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          </div>
+
+          {hraCity === "other" && (
+            <div className="space-y-1">
+              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide block">
+                Specify City Name*
+              </label>
+              <input
+                type="text"
+                placeholder="Enter city name..."
+                value={customCity}
+                onChange={(e) => setCustomCity(e.target.value)}
+                className="w-full max-w-[250px] px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-bold text-foreground"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            <span className={`inline-block w-2 h-2 rounded-full ${hraIsMetro ? "bg-green-500" : "bg-amber-500"}`} />
+            <span className="text-[10px] font-bold text-muted-foreground">
+              {hraIsMetro ? "Metro City (50% HRA limit)" : "Non-Metro City (40% HRA limit)"}
+            </span>
           </div>
         </div>
       </div>

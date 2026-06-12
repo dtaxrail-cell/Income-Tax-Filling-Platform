@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Shield, Instagram, ArrowRight, Lock, CheckCircle, Zap,
   Smartphone, Star, ChevronRight, ChevronDown, Calculator
@@ -15,12 +15,27 @@ import {
 
 interface HomePageProps {
   setPage: (p: Page) => void;
+  activeCalcIndex: number | null;
+  setActiveCalcIndex: (index: number | null) => void;
 }
 
-export function HomePage({ setPage }: HomePageProps) {
+export function HomePage({ setPage, activeCalcIndex, setActiveCalcIndex }: HomePageProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [expandedCalc, setExpandedCalc] = useState<number | null>(null);
   const [persona, setPersona] = useState<"salaried" | "retailer" | "freelancer">("salaried");
+
+  useEffect(() => {
+    if (activeCalcIndex !== null) {
+      setExpandedCalc(activeCalcIndex);
+      setTimeout(() => {
+        const el = document.getElementById("calculators-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+      setActiveCalcIndex(null);
+    }
+  }, [activeCalcIndex, setActiveCalcIndex]);
 
   const steps = [
     { num: "01", title: "Login Securely", desc: "Create your account with Aadhaar-linked mobile OTP verification" },
@@ -174,43 +189,8 @@ export function HomePage({ setPage }: HomePageProps) {
         </div>
       </section>
 
-      {/* ── How It Works ── */}
-      <section className="py-24 bg-[#0C1B33] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/40 via-transparent to-blue-950/40 opacity-70 animate-pulse" style={{ animationDuration: "12s" }} />
-        <SectionParticles />
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-white/10 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
-              HOW IT WORKS
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white" style={display}>
-              File your ITR in 4 simple steps
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {steps.map(({ num, title, desc }, idx) => (
-              <div key={num} className="relative group">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors h-full">
-                  <div className="font-bold text-blue-400/30 mb-4 text-5xl leading-none" style={mono}>{num}</div>
-                  <h3 className="font-bold text-white mb-2" style={display}>{title}</h3>
-                  <p className="text-sm text-blue-100/60 leading-relaxed">{desc}</p>
-                </div>
-                {idx < 3 && (
-                  <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                    <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center">
-                      <ChevronRight className="w-3.5 h-3.5 text-blue-400" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Calculators and ITR Filing Form Selection ── */}
-      <section className="py-20 bg-background">
+      {/* ── Calculators ── */}
+      <section id="calculators-section" className="py-20 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
@@ -290,53 +270,90 @@ export function HomePage({ setPage }: HomePageProps) {
               );
             })}
           </div>
+        </div>
+      </section>
 
-          {/* ITR filing form selection section */}
-          <div className="mt-20 border-t border-border pt-16">
-            <div className="text-center mb-10">
-              <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
-                ITR SELECTION
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3" style={display}>
-                ITR Filing Form Selection
-              </h3>
-              <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-                Select your applicable Income Tax Return (ITR) form to view details, eligibility guidelines, and document checklists.
-              </p>
+      {/* ── ITR Selection ── */}
+      <section className="py-20 bg-background border-t border-border">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <div className="inline-block bg-secondary text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+              ITR SELECTION
             </div>
+            <h3 className="text-2xl font-bold text-foreground mb-3" style={display}>
+              ITR Filing Form Selection
+            </h3>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              Select your applicable Income Tax Return (ITR) form to view details, eligibility guidelines, and document checklists.
+            </p>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { name: "ITR-1", label: "Salaried", desc: "Salaried individuals & Pensioners (< ₹50L)" },
-                { name: "ITR-2", label: "Capital Gains", desc: "Capital gains, foreign assets, multiple houses" },
-                { name: "ITR-3", label: "Proprietorship & F&O", desc: "Business, professional income, F&O/Crypto" },
-                { name: "ITR-4", label: "Presumptive", desc: "Presumptive business & profession (< ₹50L)" },
-                { name: "ITR-5", label: "LLPs & Firms", desc: "Partnerships, LLPs, AOPs, BOIs" },
-                { name: "ITR-6", label: "Companies", desc: "Corporates & Registered Companies" },
-                { name: "ITR-7", label: "Trusts & Orgs", desc: "Charitable, political, educational trusts" },
-              ].map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => setPage("itr-filing")}
-                  className="bg-card border-2 border-border hover:border-primary/40 rounded-3xl p-6 text-left transition-all hover:shadow-md group flex flex-col justify-between h-full cursor-pointer text-foreground"
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="font-extrabold text-lg text-foreground" style={display}>{item.name}</span>
-                      <span className="text-[9px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full uppercase" style={mono}>
-                        {item.label}
-                      </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { name: "ITR-1", label: "Salaried", desc: "Salaried individuals & Pensioners (< ₹50L)" },
+              { name: "ITR-2", label: "Capital Gains", desc: "Capital gains, foreign assets, multiple houses" },
+              { name: "ITR-3", label: "Proprietorship & F&O", desc: "Business, professional income, F&O/Crypto" },
+              { name: "ITR-4", label: "Presumptive", desc: "Presumptive business & profession (< ₹50L)" },
+              { name: "ITR-5", label: "LLPs & Firms", desc: "Partnerships, LLPs, AOPs, BOIs" },
+              { name: "ITR-6", label: "Companies", desc: "Corporates & Registered Companies" },
+              { name: "ITR-7", label: "Trusts & Orgs", desc: "Charitable, political, educational trusts" },
+            ].map((item) => (
+              <button
+                key={item.name}
+                onClick={() => setPage("itr-filing")}
+                className="bg-card border-2 border-border hover:border-primary/40 rounded-3xl p-6 text-left transition-all hover:shadow-md group flex flex-col justify-between h-full cursor-pointer text-foreground"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="font-extrabold text-lg text-foreground" style={display}>{item.name}</span>
+                    <span className="text-[9px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full uppercase" style={mono}>
+                      {item.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                    {item.desc}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-primary font-bold mt-auto group-hover:translate-x-0.5 transition-transform">
+                  View Guidelines <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How It Works ── */}
+      <section className="py-24 bg-[#0C1B33] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/40 via-transparent to-blue-950/40 opacity-70 animate-pulse" style={{ animationDuration: "12s" }} />
+        <SectionParticles />
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-14">
+            <div className="inline-block bg-white/10 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-4" style={mono}>
+              HOW IT WORKS
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white" style={display}>
+              File your ITR in 4 simple steps
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {steps.map(({ num, title, desc }, idx) => (
+              <div key={num} className="relative group">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors h-full">
+                  <div className="font-bold text-blue-400/30 mb-4 text-5xl leading-none" style={mono}>{num}</div>
+                  <h3 className="font-bold text-white mb-2" style={display}>{title}</h3>
+                  <p className="text-sm text-blue-100/60 leading-relaxed">{desc}</p>
+                </div>
+                {idx < 3 && (
+                  <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
+                    <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center">
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-400" />
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                      {item.desc}
-                    </p>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-primary font-bold mt-auto group-hover:translate-x-0.5 transition-transform">
-                    View Guidelines <ChevronRight className="w-3.5 h-3.5" />
-                  </div>
-                </button>
-              ))}
-            </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>

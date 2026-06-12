@@ -19,6 +19,12 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeService, setActiveService] = useState<string | null>(null);
+  const [activeCalcIndex, setActiveCalcIndex] = useState<number | null>(null);
+
+  const selectCalculator = (index: number) => {
+    navigate("/");
+    setActiveCalcIndex(index);
+  };
 
   const getPageFromPath = (path: string): Page => {
     if (path.startsWith("/about")) return "about";
@@ -47,17 +53,17 @@ function AppContent() {
       <Navbar page={page} setPage={setPageAndScroll} />
       <main className="flex-1 relative z-10">
         <Routes>
-          <Route path="/" element={<HomePage setPage={setPageAndScroll} />} />
-          <Route path="/home" element={<HomePage setPage={setPageAndScroll} />} />
+          <Route path="/" element={<HomePage setPage={setPageAndScroll} activeCalcIndex={activeCalcIndex} setActiveCalcIndex={setActiveCalcIndex} />} />
+          <Route path="/home" element={<HomePage setPage={setPageAndScroll} activeCalcIndex={activeCalcIndex} setActiveCalcIndex={setActiveCalcIndex} />} />
           <Route path="/about" element={<AboutPage setPage={setPageAndScroll} />} />
           <Route path="/services" element={<ServicesPage setPage={setPageAndScroll} />} />
           <Route path="/future" element={<FutureExpansionPage setPage={setPageAndScroll} />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/itr-filing" element={<ItrFilingPage setPage={setPageAndScroll} />} />
-          <Route path="*" element={<HomePage setPage={setPageAndScroll} />} />
+          <Route path="*" element={<HomePage setPage={setPageAndScroll} activeCalcIndex={activeCalcIndex} setActiveCalcIndex={setActiveCalcIndex} />} />
         </Routes>
       </main>
-      <Footer setPage={setPageAndScroll} onSelectService={setActiveService} />
+      <Footer setPage={setPageAndScroll} onSelectService={setActiveService} onSelectCalculator={selectCalculator} />
       <ScrollToTop />
       <FloatingWhatsApp />
       <PlatformModal activeService={activeService} onClose={() => setActiveService(null)} setPage={setPageAndScroll} />
