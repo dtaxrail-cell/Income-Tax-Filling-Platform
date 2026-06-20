@@ -44,6 +44,21 @@ function ModalSliderInput({
     }
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setRaw(String(value));
+    const input = e.currentTarget;
+    setTimeout(() => {
+      input.select();
+    }, 0);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    if (input.selectionStart === 0 && input.selectionEnd === 0 && input.value.length > 0) {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  };
+
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center gap-4">
@@ -56,7 +71,8 @@ function ModalSliderInput({
             value={display}
             onChange={handleChange}
             onBlur={handleBlur}
-            onFocus={() => setRaw(String(value))}
+            onFocus={handleFocus}
+            onMouseUp={handleMouseUp}
             className="w-full bg-transparent text-right text-xs font-bold text-foreground focus:outline-none tabular-nums"
           />
           {suffix && <span className="text-[10px] font-bold text-muted-foreground ml-1 select-none">{suffix}</span>}

@@ -104,6 +104,21 @@ function SliderInput({
     onChange(Math.min(max, Math.max(min, value)));
   };
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setRawInput(String(value));
+    const input = e.currentTarget;
+    setTimeout(() => {
+      input.select();
+    }, 0);
+  };
+
+  const handleInputMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    if (input.selectionStart === 0 && input.selectionEnd === 0 && input.value.length > 0) {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  };
+
   const displayValue = rawInput !== null ? rawInput : value.toLocaleString("en-IN");
 
   return (
@@ -120,7 +135,8 @@ function SliderInput({
             value={displayValue}
             onChange={handleInputChange}
             onBlur={handleInputBlur}
-            onFocus={() => setRawInput(String(value))}
+            onFocus={handleInputFocus}
+            onMouseUp={handleInputMouseUp}
             className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none tabular-nums"
           />
         </div>

@@ -37,6 +37,21 @@ function CalcSliderInput({
     }
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setRaw(String(value));
+    const input = e.currentTarget;
+    setTimeout(() => {
+      input.select();
+    }, 0);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    if (input.selectionStart === 0 && input.selectionEnd === 0 && input.value.length > 0) {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  };
+
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-center gap-4">
@@ -49,7 +64,8 @@ function CalcSliderInput({
             value={displayVal}
             onChange={handleChange}
             onBlur={handleBlur}
-            onFocus={() => setRaw(String(value))}
+            onFocus={handleFocus}
+            onMouseUp={handleMouseUp}
             className="w-full bg-transparent text-right text-xs font-bold text-foreground focus:outline-none tabular-nums"
           />
           {suffix && <span className="text-[10px] font-bold text-muted-foreground ml-1 select-none">{suffix}</span>}
@@ -94,7 +110,7 @@ export function HraCalculatorDirect() {
   const actHra = hraReceived;
   const totalSalary = hraBasicSalary + hraDa;
   const rentExcess = Math.max(0, hraRentPaid - 0.1 * totalSalary);
-  const basicPct = (hraIsMetro ? 0.6 : 0.5) * totalSalary; // 60% for Metro, 50% for Non-Metro
+  const basicPct = (hraIsMetro ? 0.5 : 0.4) * totalSalary; // 50% for Metro, 40% for Non-Metro
   const hraExemption = Math.min(actHra, rentExcess, basicPct);
   const taxableHra = Math.max(0, hraReceived - hraExemption);
 
@@ -203,7 +219,7 @@ export function HraCalculatorDirect() {
           <div className="flex items-center gap-1.5">
             <span className={`inline-block w-2 h-2 rounded-full ${hraIsMetro ? "bg-green-500" : "bg-amber-500"}`} />
             <span className="text-[10px] font-bold text-muted-foreground">
-              {hraIsMetro ? "Metro City (60% HRA limit)" : "Non-Metro City (50% HRA limit)"}
+              {hraIsMetro ? "Metro City (50% HRA limit)" : "Non-Metro City (40% HRA limit)"}
             </span>
           </div>
         </div>
@@ -229,7 +245,7 @@ export function HraCalculatorDirect() {
             <Info className="w-4 h-4 text-blue-500" /> Exemption Limit Summary
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            HRA exemption is always the **lowest** of: (1) Actual HRA received ({formatCurrency(actHra)}), (2) Rent paid excess of 10% of salary ({formatCurrency(rentExcess)}), or (3) 60%/50% of basic salary ({formatCurrency(basicPct)}).
+            HRA exemption is always the **lowest** of: (1) Actual HRA received ({formatCurrency(actHra)}), (2) Rent paid excess of 10% of salary ({formatCurrency(rentExcess)}), or (3) 50%/40% of basic salary ({formatCurrency(basicPct)}).
           </p>
           <div className="space-y-1">
             <div className="flex justify-between text-[9px] text-muted-foreground">
