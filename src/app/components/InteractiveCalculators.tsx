@@ -21,7 +21,7 @@ function CalcSliderInput({
 }) {
   const [raw, setRaw] = useState<string | null>(null);
   const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
-  const displayVal = raw !== null ? raw : Math.round(value).toLocaleString("en-IN");
+  const displayVal = raw !== null ? raw : value.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
   const handleBlur = () => {
     setRaw(null);
@@ -87,16 +87,14 @@ export function HraCalculatorDirect() {
   const [hraDa, setHraDa] = useState(0);
   const [hraReceived, setHraReceived] = useState(0);
   const [hraRentPaid, setHraRentPaid] = useState(0);
-  const [hraCity, setHraCity] = useState("delhi");
-  const [customCity, setCustomCity] = useState("");
+  const [liveInMetro, setLiveInMetro] = useState(true);
+  const [selectedMetroCity, setSelectedMetroCity] = useState("delhi");
 
-  const activeCity = hraCity === "other" ? customCity : hraCity;
-  const hraIsMetro = ["delhi", "mumbai", "kolkata", "chennai"].includes(activeCity.trim().toLowerCase());
-
+  const hraIsMetro = liveInMetro;
   const actHra = hraReceived;
   const totalSalary = hraBasicSalary + hraDa;
   const rentExcess = Math.max(0, hraRentPaid - 0.1 * totalSalary);
-  const basicPct = (hraIsMetro ? 0.5 : 0.4) * totalSalary;
+  const basicPct = (hraIsMetro ? 0.6 : 0.5) * totalSalary; // 60% for Metro, 50% for Non-Metro
   const hraExemption = Math.min(actHra, rentExcess, basicPct);
   const taxableHra = Math.max(0, hraReceived - hraExemption);
 
@@ -151,48 +149,61 @@ export function HraCalculatorDirect() {
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
-              City of Residence*
+              Do you live in a Metro City?
             </label>
-            <div className="relative w-full max-w-[250px]">
-              <select
-                value={hraCity}
-                onChange={(e) => setHraCity(e.target.value)}
-                className="w-full bg-white dark:bg-slate-800 border border-border rounded-lg px-3 py-1.5 pr-8 text-xs font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer appearance-none"
+            <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-xl w-[200px]">
+              <button
+                type="button"
+                onClick={() => setLiveInMetro(true)}
+                className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer text-center ${
+                  liveInMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                }`}
               >
-                <option value="delhi">Delhi (Metro)</option>
-                <option value="mumbai">Mumbai (Metro)</option>
-                <option value="kolkata">Kolkata (Metro)</option>
-                <option value="chennai">Chennai (Metro)</option>
-                <option value="bangalore">Bangalore</option>
-                <option value="hyderabad">Hyderabad</option>
-                <option value="pune">Pune</option>
-                <option value="other">Other (Specify)</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-muted-foreground">
-                <ChevronDown className="w-3.5 h-3.5" />
-              </div>
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setLiveInMetro(false)}
+                className={`py-1.5 px-3 text-xs font-bold rounded-lg transition-all cursor-pointer text-center ${
+                  !liveInMetro ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                No
+              </button>
             </div>
           </div>
 
-          {hraCity === "other" && (
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide block">
-                Specify City Name*
+          {liveInMetro && (
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5">
+                Select Metro City
               </label>
-              <input
-                type="text"
-                placeholder="Enter city name..."
-                value={customCity}
-                onChange={(e) => setCustomCity(e.target.value)}
-                className="w-full max-w-[250px] px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-bold text-foreground"
-              />
+              <div className="relative w-full max-w-[250px]">
+                <select
+                  value={selectedMetroCity}
+                  onChange={(e) => setSelectedMetroCity(e.target.value)}
+                  className="w-full bg-white dark:bg-slate-800 border border-border rounded-lg px-3 py-1.5 pr-8 text-xs font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer appearance-none"
+                >
+                  <option value="delhi">Delhi</option>
+                  <option value="mumbai">Mumbai</option>
+                  <option value="kolkata">Kolkata</option>
+                  <option value="chennai">Chennai</option>
+                  <option value="bangalore">Bangalore</option>
+                  <option value="hyderabad">Hyderabad</option>
+                  <option value="pune">Pune</option>
+                  <option value="ahmedabad">Ahmedabad</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-muted-foreground">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              </div>
             </div>
           )}
 
           <div className="flex items-center gap-1.5">
             <span className={`inline-block w-2 h-2 rounded-full ${hraIsMetro ? "bg-green-500" : "bg-amber-500"}`} />
             <span className="text-[10px] font-bold text-muted-foreground">
-              {hraIsMetro ? "Metro City (50% HRA limit)" : "Non-Metro City (40% HRA limit)"}
+              {hraIsMetro ? "Metro City (60% HRA limit)" : "Non-Metro City (50% HRA limit)"}
             </span>
           </div>
         </div>
@@ -218,7 +229,7 @@ export function HraCalculatorDirect() {
             <Info className="w-4 h-4 text-blue-500" /> Exemption Limit Summary
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            HRA exemption is always the **lowest** of: (1) Actual HRA received ({formatCurrency(actHra)}), (2) Rent paid excess of 10% of salary ({formatCurrency(rentExcess)}), or (3) 50%/40% of basic salary ({formatCurrency(basicPct)}).
+            HRA exemption is always the **lowest** of: (1) Actual HRA received ({formatCurrency(actHra)}), (2) Rent paid excess of 10% of salary ({formatCurrency(rentExcess)}), or (3) 60%/50% of basic salary ({formatCurrency(basicPct)}).
           </p>
           <div className="space-y-1">
             <div className="flex justify-between text-[9px] text-muted-foreground">
@@ -286,7 +297,7 @@ export function EmiCalculatorDirect() {
           onChange={setEmiTenure}
           min={0}
           max={30}
-          step={1}
+          step={0.1}
           suffix="Y"
         />
       </div>
@@ -375,7 +386,7 @@ export function SipCalculatorDirect() {
           onChange={setSipTenure}
           min={0}
           max={40}
-          step={1}
+          step={0.1}
           suffix="Y"
         />
       </div>
@@ -485,7 +496,7 @@ export function PvFvCalculatorDirect() {
           onChange={setPvTenure}
           min={0}
           max={40}
-          step={1}
+          step={0.1}
           suffix="Y"
         />
       </div>

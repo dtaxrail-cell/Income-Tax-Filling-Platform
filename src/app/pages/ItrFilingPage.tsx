@@ -101,7 +101,7 @@ export function ItrFilingPage({ setPage }: ItrFilingPageProps) {
 
           <div className="grid lg:grid-cols-4 gap-8 items-start">
             {/* Left Column: Tab Selectors */}
-            <div className="lg:col-span-1 space-y-2 bg-card border border-border p-4 rounded-3xl sticky top-20 shadow-sm">
+            <div className="lg:col-span-1 space-y-2 bg-card border border-border p-4 rounded-3xl lg:sticky lg:top-20 shadow-sm">
               <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-3 pb-2 border-b border-border mb-2" style={mono}>
                 ITR Form Types
               </div>

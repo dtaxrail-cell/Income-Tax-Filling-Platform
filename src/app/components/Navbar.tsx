@@ -37,10 +37,10 @@ export function Navbar({ page, setPage }: NavbarProps) {
             onClick={() => setPage("home")}
             className="flex items-center gap-2.5"
           >
-            <div className="h-10 flex items-center bg-white border border-gray-100 rounded-xl px-2.5 py-1 shadow-sm overflow-hidden flex-shrink-0">
+            <div className="h-10 w-10 flex items-center justify-center bg-white border border-gray-100 rounded-xl p-1 shadow-sm overflow-hidden flex-shrink-0">
               <img
-                src="/logo.jpg"
-                className="h-8 w-auto object-contain"
+                src="/logo.png"
+                className="h-8 w-8 object-contain"
                 alt="DTR Logo"
               />
             </div>

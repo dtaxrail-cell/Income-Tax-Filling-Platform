@@ -14,10 +14,10 @@ export function Footer({ setPage, onSelectService, onSelectCalculator }: FooterP
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="h-10 flex items-center bg-white border border-gray-100 rounded-xl px-2.5 py-1 shadow-sm overflow-hidden flex-shrink-0">
+              <div className="h-10 w-10 flex items-center justify-center bg-white border border-gray-100 rounded-xl p-1 shadow-sm overflow-hidden flex-shrink-0">
                 <img
-                  src="/logo.jpg"
-                  className="h-8 w-auto object-contain"
+                  src="/logo.png"
+                  className="h-8 w-8 object-contain"
                   alt="DTR Logo"
                 />
               </div>
